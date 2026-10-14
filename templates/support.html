@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Support Center — GN Bank{% endblock %}
+
+{% block styles %}
+    /* ---------- Support Page Styling ---------- */
+    .support-hero {
+        background: #0f172a; /* Dark Navy Blue */
+        color: #ffffff;
+        padding: 4rem 1.5rem;
+        text-align: center;
+        border-bottom: 4px solid #7b1113; /* GN Bank red accent */
+    }
+    .support-hero h1 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        letter-spacing: -0.5px;
+    }
+    .support-hero p {
+        font-size: 1.15rem;
+        color: #cbd5e1;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    /* ---------- Contact Info Card ---------- */
+    .contact-card {
+        background: #ffffff;
+        max-width: 700px;
+        margin: -3rem auto 3rem auto;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+        text-align: center;
+        position: relative;
+        z-index: 5;
+        border-top: 5px solid #7b1113;
+    }
+    .contact-card h2 {
+        color: #1e1b4b;
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .contact-card p {
+        color: #64748b;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+    .contact-details {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 2rem;
+    }
+    .contact-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    .contact-item .label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94a3b8;
+        font-weight: 700;
+    }
+    .contact-item .value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    /* ---------- Services Grid ---------- */
+    .services-section {
+        padding: 3rem 1.5rem 5rem 1.5rem;
+        max-width: 1100px;
+        margin: 0 auto;
+        width: 100%;
+    }
+    .services-section h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1e1b4b;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    .service-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        border-left: 5px solid #7b1113;
+    }
+    .service-header {
+        padding: 1.5rem 2rem;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .service-header .icon {
+        font-size: 1.5rem;
+    }
+    .service-header h3 {
+        font-size: 1.4rem;
+        color: #1e1b4b;
+        margin: 0;
+    }
+    .service-body {
+        padding: 2rem;
+    }
+    .service-body h4 {
+        font-size: 1rem;
+        color: #7b1113;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.75rem;
+        margin-top: 1.5rem;
+    }
+    .service-body h4:first-child {
+        margin-top: 0;
+    }
+    .service-body ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 1rem 0;
+    }
+    .service-body ul li {
+        padding: 0.5rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+        color: #334155;
+        font-size: 0.95rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .service-body ul li:last-child {
+        border-bottom: none;
+    }
+    .service-body ul li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #7b1113;
+        font-weight: 700;
+    }
+    .service-body p {
+        color: #475569;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        margin-bottom: 1rem;
+    }
+
+    /* ---------- Important Note ---------- */
+    .important-note {
+        background: #fef2f2; /* Light red background */
+        border: 1px solid #fecaca;
+        border-left: 5px solid #7b1113;
+        border-radius: 8px;
+        padding: 1.5rem 2rem;
+        margin-top: 3rem;
+        max-width: 1100px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .important-note h4 {
+        color: #7b1113;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .important-note p {
+        color: #450a0a;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    /* ---------- Mobile Tweaks ---------- */
+    @media (max-width: 768px) {
+        .support-hero h1 { font-size: 1.8rem; }
+        .support-hero p { font-size: 1rem; }
+        .contact-card { margin: -2rem 1rem 2rem 1rem; padding: 1.5rem; }
+        .contact-details { flex-direction: column; gap: 1rem; }
+        .service-header { padding: 1.25rem 1.5rem; }
+        .service-header h3 { font-size: 1.15rem; }
+        .service-body { padding: 1.5rem; }
+        .important-note { margin: 2rem 1rem 0 1rem; padding: 1.25rem 1.5rem; }
+    }
+{% endblock %}
+
+{% block content %}
+    <!-- Support Hero -->
+    <section class="support-hero">
+        <h1>Customer Support Center</h1>
+        <p>We are here to help you every step of the way. Explore our services, requirements, and processes below.</p>
+    </section>
+
+    <!-- Contact Info Card -->
+    <div class="contact-card">
+        <h2>Get in Touch</h2>
+        <p>Our support team is available to assist you with any inquiries.</p>
+        <div class="contact-details">
+            <div class="contact-item">
+                <span class="label">Customer Support Number</span>
+                <span class="value">030221199</span>
+            </div>
+            <div class="contact-item">
+                <span class="label">Email Support</span>
+                <span class="value">support@gnbank.com</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services Section -->
+    <section class="services-section">
+        <h2>Our Services & Requirements</h2>
+
+        <!-- Loan Services -->
+        <div class="service-card">
+            <div class="service-header">
+                <span class="icon">💰</span>
+                <h3>Personal & Salary Loans</h3>
+            </div>
+            <div class="service-body">
+                <h4>Process</h4>
+                <p>Submit a completed loan application form along with all supporting documents. Your application will be assessed based on your income, credit history, and debt burden ratio (maximum 50% of net monthly income). Upon approval, a facility agreement is executed, and funds are disbursed into your account.</p>
+                <h4>Requirements</h4>
+                <ul>
+                    <li>Completed loan application form</li>
+                    <li>One recent passport-sized photograph</li>
+                    <li>Valid Ghana Card (mandatory)</li>
+                    <li>Introductory letter from your employer</li>
+                    <li>Payslips for the previous three (3) months</li>
+                    <li>Employer's undertaking to pay salaries into your account</li>
+                    <li>Two (2) third-party guarantors with valid IDs</li>
+                    <li>Bank statements (last 3–6 months, if applicable)</li>
+                </ul>
+                <p><strong>Eligibility:</strong> Applicant must be actively employed, between 18–57 years of age, and have held an account for at least one month.</p>
+            </div>
+        </div>
+
+        <!-- Savings Accounts -->
+        <div class="service-card">
+            <div class="service-header">
+                <span class="icon">🏦</span>
+                <h3>Savings & Current Accounts</h3>
+            </div>
+            <div class="service-body">
+                <h4>Process</h4>
+                <p>Visit any GN Bank branch to complete an account opening form. Once your documents are verified, you can make your initial deposit and activate your account. Savings accounts earn interest, while current accounts are ideal for everyday transactions.</p>
+                <h4>Requirements</h4>
+                <ul>
+                    <li>Fully completed account opening form</li>
+                    <li>Valid national ID — Ghana Card only</li>
+                    <li>One (1) recent passport-sized photograph</li>
+                    <li>Proof of residential or digital address (utility bill, tenancy agreement)</li>
+                    <li>Initial deposit (minimum GHS 20 for savings accounts)</li>
+                    <li>For joint accounts: IDs of all signatories</li>
+                </ul>
+                <p><strong>Note:</strong> Business accounts require additional documents such as business registration certificates and IDs of directors.</p>
+            </div>
+        </div>
+
+        <!-- Government Workers Loan -->
+        <div class="service-card">
+            <div class="service-header">
+                <span class="icon">🏛️</span>
+                <h3>Government Workers Loan</h3>
+            </div>
+            <div class="service-body">
+                <h4>Process</h4>
+                <p>This loan is designed for public sector employees on the Controller and Accountant General's Department (CAGD) payroll. Submit your application along with the required documents. Your loan amount is determined by your affordability as per the CAGD portal. Repayment is made via salary deduction.</p>
+                <h4>Requirements</h4>
+                <ul>
+                    <li>Completed loan application form</li>
+                    <li>Valid Ghana Card</li>
+                    <li>One passport-sized photograph</li>
+                    <li>Proof of address</li>
+                    <li>Introductory letter from employer</li>
+                    <li>Payslips for the previous three (3) months</li>
+                    <li>Employee number and CAGD mandate number/PIN</li>
+                    <li>Must be on the Government of Ghana payroll</li>
+                    <li>Age: 18–53 years</li>
+                    <li>Minimum net income: GHS 3,000</li>
+                </ul>
+                <p><strong>Benefits:</strong> Flexible repayment (6–60 months), no penalty for early repayment, and no monthly account keeping charges.</p>
+            </div>
+        </div>
+
+        <!-- Collateral -->
+        <div class="service-card">
+            <div class="service-header">
+                <span class="icon">📜</span>
+                <h3>Collateral Requirements</h3>
+            </div>
+            <div class="service-body">
+                <h4>Accepted Collateral Types</h4>
+                <p>For secured lending, GN Bank accepts the following forms of collateral. The market value of the collateral must be at least 120% of the outstanding loan amount.</p>
+                <ul>
+                    <li>Landed property (with clear and undisputed title)</li>
+                    <li>Motor vehicles (with comprehensive insurance)</li>
+                    <li>Cash collateral or fixed deposits</li>
+                    <li>Shares and other financial securities</li>
+                    <li>Corporate or personal guarantees</li>
+                    <li>Life insurance policies</li>
+                </ul>
+                <h4>Documentation for Landed Property Collateral</h4>
+                <ul>
+                    <li>Original title deeds / land certificate</li>
+                    <li>Valuation report from a bank-approved valuer</li>
+                    <li>Official search report from the Lands Commission</li>
+                    <li>Mortgage agreement (duly stamped and registered)</li>
+                    <li>Consent to mortgage (where applicable)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Mortgages -->
+        <div class="service-card">
+            <div class="service-header">
+                <span class="icon">🏠</span>
+                <h3>Mortgage Loans</h3>
+            </div>
+            <div class="service-body">
+                <h4>Process</h4>
+                <p>Submit your mortgage application along with the required documents. The property will be valued by an approved valuer, and a legal search will be conducted. Upon approval, the mortgage agreement is executed, and the loan is disbursed. Repayment terms range from 5 to 10 years, and the loan must be fully repaid before retirement age.</p>
+                <h4>Requirements</h4>
+                <ul>
+                    <li>Completed mortgage application form</li>
+                    <li>Valid Ghana Card (or passport for non-residents)</li>
+                    <li>Two (2) passport-sized photographs</li>
+                    <li>Payslips for the past three (3) months</li>
+                    <li>Proof of continuous employment for two (2) years</li>
+                    <li>Offer letter or Sale & Purchase Agreement</li>
+                    <li>Valuation report on the property</li>
+                    <li>Official search report on the property</li>
+                    <li>Vendor's title deeds</li>
+                    <li>Consent to Assign/Mortgage</li>
+                    <li>Deeds of Assignment from the vendor</li>
+                    <li>Ten (10) sun-printed copies of the site plan</li>
+                    <li>Spousal consent in writing (if married)</li>
+                    <li>Minimum equity contribution: 20%</li>
+                </ul>
+                <p><strong>Eligibility:</strong> Minimum age of 21, with loan repayment completed by age 60. A satisfactory credit score is required.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Important Note -->
+    <div class="important-note">
+        <h4>⚠️ Important Notice</h4>
+        <p><strong>NB:</strong> For sensitive and security-related matters, we kindly advise you to visit our nearest branch to speak with us personally. Our dedicated staff will be available to assist you with confidentiality and care.</p>
+    </div>
+{% endblock %}

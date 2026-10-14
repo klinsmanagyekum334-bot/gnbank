@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+
+{% block title %}Account Information — GN Bank{% endblock %}
+
+{% block styles %}
+    header, footer { display: none !important; }
+    main { background: #f1f5f9; }
+
+    .app-shell {
+        max-width: 480px;
+        margin: 0 auto;
+        background: #f1f5f9;
+        min-height: 100vh;
+        padding-bottom: 60px;
+        position: relative;
+    }
+
+    /* ---------- Top Bar ---------- */
+    .app-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        background: #ffffff;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .back-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #334155;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .back-btn:hover { background: #e2e8f0; }
+    .app-topbar h1 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .topbar-spacer { width: 36px; }
+
+    /* ---------- Profile Header ---------- */
+    .profile-header {
+        padding: 2rem 1.25rem 1.5rem 1.25rem;
+        background: linear-gradient(135deg, #7b1113 0%, #9a3412 100%);
+        color: #ffffff;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .profile-header::before {
+        content: "";
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 180px;
+        height: 180px;
+        background: rgba(255, 255, 255, 0.07);
+        border-radius: 50%;
+    }
+    .profile-header::after {
+        content: "";
+        position: absolute;
+        bottom: -60px;
+        left: -40px;
+        width: 160px;
+        height: 160px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+    }
+    .profile-avatar {
+        width: 78px;
+        height: 78px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.75rem;
+        margin: 0 auto 0.9rem auto;
+        border: 3px solid rgba(255, 255, 255, 0.4);
+        position: relative;
+        z-index: 2;
+    }
+    .profile-header h2 {
+        font-size: 1.3rem;
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+        position: relative;
+        z-index: 2;
+    }
+    .profile-header .role-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* ---------- Caution Note ---------- */
+    .caution-note {
+        margin: 1.25rem 1.25rem 0 1.25rem;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-left: 5px solid #7b1113;
+        border-radius: 10px;
+        padding: 1rem 1.15rem;
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+    .caution-note .icon {
+        font-size: 1.15rem;
+        flex-shrink: 0;
+    }
+    .caution-note .text {
+        font-size: 0.82rem;
+        color: #7f1d1d;
+        line-height: 1.55;
+    }
+    .caution-note .text strong {
+        color: #7b1113;
+    }
+
+    /* ---------- Info Cards ---------- */
+    .info-card {
+        background: #ffffff;
+        margin: 1rem 1.25rem 0 1.25rem;
+        border-radius: 16px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+    }
+    .info-card .card-title {
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 1.3px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .info-card .card-title::before {
+        content: "";
+        width: 4px;
+        height: 14px;
+        background: #7b1113;
+        border-radius: 2px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.85rem 0;
+        border-bottom: 1px solid #f1f5f9;
+        gap: 0.75rem;
+    }
+    .info-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .info-row .label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 500;
+        flex-shrink: 0;
+    }
+    .info-row .value {
+        font-size: 0.9rem;
+        color: #1e293b;
+        font-weight: 700;
+        text-align: right;
+        word-break: break-all;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .info-row .value.mono {
+        font-family: 'Courier New', monospace;
+        letter-spacing: 0.5px;
+    }
+    .info-row .toggle-eye {
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: #7b1113;
+        background: #fef2f2;
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: background 0.15s;
+    }
+    .info-row .toggle-eye:hover {
+        background: #fecaca;
+    }
+
+    /* Status badge */
+    .status-badge {
+        display: inline-block;
+        padding: 0.2rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+    .status-active { background: #dcfce7; color: #166534; }
+    .status-inactive { background: #fee2e2; color: #991b1b; }
+    .status-pending { background: #fef3c7; color: #92400e; }
+
+    /* ---------- Security Section ---------- */
+    .security-note {
+        margin: 1rem 1.25rem 2rem 1.25rem;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+        display: flex;
+        gap: 0.85rem;
+        align-items: flex-start;
+    }
+    .security-note .icon-wrap {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #e0e7ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        flex-shrink: 0;
+    }
+    .security-note h4 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 0.3rem;
+    }
+    .security-note p {
+        font-size: 0.8rem;
+        color: #64748b;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    /* ---------- Bottom Note ---------- */
+    .bottom-note {
+        text-align: center;
+        font-size: 0.72rem;
+        color: #94a3b8;
+        padding: 0 1.25rem 2rem 1.25rem;
+        line-height: 1.6;
+    }
+{% endblock %}
+
+{% block content %}
+    <div class="app-shell">
+
+        <!-- Top Bar -->
+        <div class="app-topbar">
+            <a href="{{ url_for('dashboard') }}" class="back-btn">←</a>
+            <h1>Account Information</h1>
+            <div class="topbar-spacer"></div>
+        </div>
+
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {% set initials = user.full_name.split() %}
+                {{ initials[0][0] }}{{ initials[-1][0] }}
+            </div>
+            <h2>{{ user.full_name }}</h2>
+            <span class="role-badge">{{ user.account.account_type }}</span>
+        </div>
+
+        <!-- Caution Note -->
+        <div class="caution-note">
+            <span class="icon">⚠️</span>
+            <div class="text">
+                <strong>Important:</strong> Unauthorised changes to account information are illegal and may result in account suspension, legal action, or loss of funds. If you need to update any detail on this page, please visit your nearest GN Bank branch with the required documentation.
+            </div>
+        </div>
+
+        <!-- Personal Information -->
+        <div class="info-card">
+            <div class="card-title">Personal Information</div>
+
+            <div class="info-row">
+                <span class="label">Full Name</span>
+                <span class="value">{{ user.full_name }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Email Address</span>
+                <span class="value">{{ email }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Phone Number</span>
+                <span class="value">{{ user.account.phone or "Not provided" }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Address</span>
+                <span class="value">{{ user.account.address or "Not provided" }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Ghana Card</span>
+                <span class="value mono">
+                    <span class="hidden-value" data-real="{{ user.account.ghana_card or 'N/A' }}">••••-•••••••-•</span>
+                    <span class="toggle-eye" onclick="toggleField(this)">👁️</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Account Details -->
+        <div class="info-card">
+            <div class="card-title">Account Details</div>
+
+            <div class="info-row">
+                <span class="label">Account Number</span>
+                <span class="value mono">
+                    <span class="hidden-value" data-real="{{ user.account.account_number }}">{{ user.account.account_number[:3] }}•••••••</span>
+                    <span class="toggle-eye" onclick="toggleField(this)">👁️</span>
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Account Type</span>
+                <span class="value">{{ user.account.account_type }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Branch</span>
+                <span class="value">{{ user.account.branch }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Date Opened</span>
+                <span class="value">{{ user.account.date_opened }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Account Status</span>
+                <span class="value">
+                    {% if user.account.account_status == 'Active' %}
+                        <span class="status-badge status-active">● Active</span>
+                    {% elif user.account.account_status == 'Inactive' %}
+                        <span class="status-badge status-inactive">● Inactive</span>
+                    {% else %}
+                        <span class="status-badge status-pending">● {{ user.account.account_status }}</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- Login Credentials -->
+        <div class="info-card">
+            <div class="card-title">Login Credentials</div>
+
+            <div class="info-row">
+                <span class="label">Username / Email</span>
+                <span class="value">{{ email }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Password</span>
+                <span class="value mono">
+                    <span class="hidden-value" data-real="{{ user.password }}">••••••••</span>
+                    <span class="toggle-eye" onclick="toggleField(this)">👁️</span>
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Account ID</span>
+                <span class="value mono">
+                    <span class="hidden-value" data-real="GNB-{{ user.account.account_number[-6:] }}">GNB-••••••</span>
+                    <span class="toggle-eye" onclick="toggleField(this)">👁️</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Security Note -->
+        <div class="security-note">
+            <div class="icon-wrap">🛡️</div>
+            <div>
+                <h4>Your Information is Protected</h4>
+                <p>GN Bank uses industry-standard encryption to protect your personal information. Never share your password or card details with anyone.</p>
+            </div>
+        </div>
+
+        <!-- Bottom note -->
+        <div class="bottom-note">
+            Last reviewed: {{ user.account.date_opened }}<br>
+            For changes, visit your nearest GN Bank branch.
+        </div>
+
+    </div>
+
+    <script>
+        function toggleField(el) {
+            const hiddenSpan = el.parentElement.querySelector('.hidden-value');
+            const realValue = hiddenSpan.getAttribute('data-real');
+            const isHidden = hiddenSpan.textContent.includes('•');
+
+            if (isHidden) {
+                hiddenSpan.dataset.original = hiddenSpan.textContent;
+                hiddenSpan.textContent = realValue;
+                el.textContent = '🙈';
+            } else {
+                hiddenSpan.textContent = hiddenSpan.dataset.original || '••••••••';
+                el.textContent = '👁️';
+            }
+        }
+    </script>
+{% endblock %}

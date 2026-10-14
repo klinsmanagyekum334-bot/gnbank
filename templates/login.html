@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Log In — GN Bank{% endblock %}
+
+{% block styles %}
+    .login-page {
+        background: #f1f5f9;
+        padding: 4rem 1.5rem;
+        min-height: 80vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+    .login-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 450px;
+        padding: 3rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+        border-top: 6px solid #7b1113;
+    }
+    .login-card h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #1e1b4b;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+    .login-card .subtitle {
+        text-align: center;
+        color: #64748b;
+        margin-bottom: 2rem;
+        font-size: 0.95rem;
+    }
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #1e1b4b;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+    .form-group input {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: inherit;
+        color: #1e293b;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-group input:focus {
+        outline: none;
+        border-color: #7b1113;
+        box-shadow: 0 0 0 3px rgba(123, 17, 19, 0.1);
+    }
+    .submit-btn {
+        width: 100%;
+        background: #7b1113;
+        color: #ffffff;
+        border: none;
+        padding: 1rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 1.05rem;
+        cursor: pointer;
+        margin-top: 0.5rem;
+        transition: background .15s ease;
+    }
+    .submit-btn:hover {
+        background: #5a0c0e;
+    }
+    .error-msg {
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 0.85rem;
+        border-radius: 8px;
+        margin-bottom: 1.25rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-align: center;
+    }
+    .signup-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.95rem;
+        color: #64748b;
+    }
+    .signup-link a {
+        color: #7b1113;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .signup-link a:hover {
+        text-decoration: underline;
+    }
+    @media (max-width: 600px) {
+        .login-page { padding: 2rem 1rem; }
+        .login-card { padding: 2rem 1.5rem; }
+        .login-card h1 { font-size: 1.5rem; }
+    }
+{% endblock %}
+
+{% block content %}
+    <section class="login-page">
+        <div class="login-card">
+            <h1>Welcome Back</h1>
+            <p class="subtitle">Log in to access your GN Bank account.</p>
+
+            {% if error %}
+                <div class="error-msg">{{ error }}</div>
+            {% endif %}
+
+            <!-- This form posts to the /login route -->
+            <form method="POST" action="{{ url_for('login') }}">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="you@example.com" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="submit-btn">Log In</button>
+            </form>
+
+            <p class="signup-link">
+                Don't have an account? <a href="{{ url_for('signup') }}">Sign Up</a>
+            </p>
+        </div>
+    </section>
+{% endblock %}

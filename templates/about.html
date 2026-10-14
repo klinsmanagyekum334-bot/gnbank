@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}About Us — GN Bank{% endblock %}
+
+{% block styles %}
+    /* ---------- About Hero Banner ---------- */
+    .about-hero {
+        position: relative;
+        width: 100%;
+        height: 350px;
+        background: #1e1b4b; /* Dark Navy fallback */
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #ffffff;
+    }
+    .about-hero img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.4; /* Dim the image so text is readable */
+        z-index: 1;
+    }
+    .about-hero-content {
+        position: relative;
+        z-index: 2;
+        padding: 0 1.5rem;
+        max-width: 800px;
+    }
+    .about-hero-content h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        letter-spacing: -0.5px;
+    }
+    .about-hero-content p {
+        font-size: 1.2rem;
+        color: #cbd5e1;
+    }
+
+    /* ---------- Content Sections ---------- */
+    .about-section {
+        padding: 4rem 1.5rem;
+        width: 100%;
+    }
+    .about-section.white { background: #ffffff; }
+    .about-section.gray { background: #f8fafc; }
+
+    .about-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+    
+    .about-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    .about-header h2 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #1e1b4b;
+        margin-bottom: 0.5rem;
+    }
+    .about-header p {
+        font-size: 1.1rem;
+        color: #475569;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    /* ---------- Mission & Text Blocks ---------- */
+    .text-block {
+        font-size: 1.05rem;
+        color: #475569;
+        line-height: 1.8;
+        margin-bottom: 1.5rem;
+    }
+
+    /* ---------- Stats Grid ---------- */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+        text-align: center;
+    }
+    .stat-item {
+        background: #ffffff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .stat-item h3 {
+        font-size: 2.5rem;
+        color: #7b1113;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+    .stat-item p {
+        font-size: 0.95rem;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* ---------- Feature Split (using loan.jpg) ---------- */
+    .feature-split {
+        display: flex;
+        align-items: center;
+        gap: 4rem;
+        margin-top: 2rem;
+    }
+    .feature-split.reverse {
+        flex-direction: row-reverse;
+    }
+    .feature-text {
+        flex: 1;
+    }
+    .feature-text h3 {
+        font-size: 1.8rem;
+        color: #1e1b4b;
+        margin-bottom: 1rem;
+    }
+    .feature-image {
+        flex: 1;
+    }
+    .feature-image img {
+        width: 100%;
+        height: auto;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+        display: block;
+    }
+
+    /* ---------- Values Grid ---------- */
+    .values-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+    .value-card {
+        background: #ffffff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border-top: 4px solid #7b1113;
+    }
+    .value-card h4 {
+        font-size: 1.3rem;
+        color: #1e1b4b;
+        margin-bottom: 0.75rem;
+    }
+    .value-card p {
+        color: #475569;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    /* ---------- Mobile Tweaks ---------- */
+    @media (max-width: 850px) {
+        .about-hero-content h1 { font-size: 2rem; }
+        .about-hero-content p { font-size: 1rem; }
+        .about-header h2 { font-size: 1.8rem; }
+        
+        .feature-split {
+            flex-direction: column;
+            gap: 2rem;
+            text-align: center;
+        }
+        .feature-split.reverse {
+            flex-direction: column;
+        }
+    }
+{% endblock %}
+
+{% block content %}
+    <!-- About Hero Banner (uses hero1.jpg) -->
+    <section class="about-hero">
+        <img src="{{ url_for('static', filename='uploads/hero1.jpg') }}" alt="About GN Bank">
+        <div class="about-hero-content">
+            <h1>About GN Bank</h1>
+            <p>Your trusted partner in financial success. Serving our community for over 90 years.</p>
+        </div>
+    </section>
+
+    <!-- Our Story Section -->
+    <section class="about-section white">
+        <div class="about-container">
+            <div class="about-header">
+                <h2>Our Story</h2>
+                <p>Built on a foundation of trust, integrity, and a commitment to community.</p>
+            </div>
+            <p class="text-block">
+                Founded in 1997 initially as Group Loan and later changed to GN Bank, GN Bank began as a small community savings institution with a simple mission: to help everyday people achieve their financial dreams. Over the decades, we have grown into a full-service financial institution, yet our core values remain unchanged.
+            </p>
+            <p class="text-block">
+                Today, we combine the personalized service of a local bank with the innovative technology of a modern digital bank. Whether you are opening your first savings account, buying a home, or growing a business, we are here to guide you every step of the way.
+            </p>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h3>90+</h3>
+                    <p>Years of Service</p>
+                </div>
+                <div class="stat-item">
+                    <h3>50+</h3>
+                    <p>Branch Locations</p>
+                </div>
+                <div class="stat-item">
+                    <h3>1M+</h3>
+                    <p>Happy Customers</p>
+                </div>
+                <div class="stat-item">
+                    <h3>$2B+</h3>
+                    <p>Assets Managed</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Impact & Loans Section (uses loan.jpg) -->
+    <section class="about-section gray">
+        <div class="about-container">
+            <div class="feature-split">
+                <div class="feature-text">
+                    <h3>Empowering Our Community</h3>
+                    <p class="text-block">
+                        We believe that when our community thrives, we all thrive. That is why we are dedicated to providing accessible lending solutions for local families and small businesses. 
+                    </p>
+                    <p class="text-block">
+                        From flexible auto loans to comprehensive home mortgages, our lending products are designed to help you build a better future. We take the time to understand your unique financial situation and work with you to find the right solution.
+                    </p>
+                </div>
+                <div class="feature-image">
+                    <!-- Using loan.jpg here -->
+                    <img src="{{ url_for('static', filename='uploads/loan.jpg') }}" alt="Community Lending and Loans">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Core Values Section -->
+    <section class="about-section white">
+        <div class="about-container">
+            <div class="about-header">
+                <h2>Our Core Values</h2>
+                <p>The principles that guide every decision we make.</p>
+            </div>
+            <div class="values-grid">
+                <div class="value-card">
+                    <h4>Integrity First</h4>
+                    <p>We do what is right, not what is easy. Transparency and honesty are at the heart of every interaction with our customers.</p>
+                </div>
+                <div class="value-card">
+                    <h4>Community Focused</h4>
+                    <p>We are more than a bank; we are your neighbors. We invest in local initiatives and support the growth of our community.</p>
+                </div>
+                <div class="value-card">
+                    <h4>Innovative Spirit</h4>
+                    <p>We continuously improve our digital tools and services to provide you with a seamless, secure, and convenient banking experience.</p>
+                </div>
+                <div class="value-card">
+                    <h4>Customer Centric</h4>
+                    <p>Your goals are our goals. We provide personalized support and tailored financial advice to help you succeed.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

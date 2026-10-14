@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Account — GN Bank{% endblock %}
+
+{% block styles %}
+    .manage-page {
+        background: #f1f5f9;
+        padding: 3rem 1.5rem 4rem 1.5rem;
+        min-height: 80vh;
+    }
+    .manage-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #7b1113;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    .manage-header {
+        margin-bottom: 2rem;
+    }
+    .manage-header h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #1e1b4b;
+        margin-bottom: 0.35rem;
+    }
+    .manage-header p {
+        color: #64748b;
+        font-size: 0.9rem;
+        font-family: 'Courier New', monospace;
+    }
+
+    .panel {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border-top: 5px solid #7b1113;
+        margin-bottom: 1.5rem;
+    }
+    .panel h2 {
+        font-size: 1.15rem;
+        color: #1e1b4b;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    @media (max-width: 650px) {
+        .form-row { grid-template-columns: 1fr; }
+    }
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #1e1b4b;
+        margin-bottom: 0.4rem;
+        font-size: 0.85rem;
+    }
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem 0.9rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-family: inherit;
+        background: #fff;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #7b1113;
+        box-shadow: 0 0 0 3px rgba(123, 17, 19, 0.1);
+    }
+    .actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 1.5rem;
+    }
+    .save-btn {
+        background: #7b1113;
+        color: #ffffff;
+        border: none;
+        padding: 0.85rem 2rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+    }
+    .save-btn:hover { background: #5a0c0e; }
+
+    .danger-panel {
+        background: #fef2f2;
+        border-radius: 12px;
+        padding: 1.75rem 2rem;
+        border: 1px solid #fecaca;
+        border-left: 5px solid #7b1113;
+    }
+    .danger-panel h2 {
+        font-size: 1.1rem;
+        color: #7b1113;
+        margin-bottom: 0.5rem;
+    }
+    .danger-panel p {
+        color: #7f1d1d;
+        font-size: 0.88rem;
+        margin-bottom: 1rem;
+    }
+    .delete-btn {
+        background: #7b1113;
+        color: #ffffff;
+        border: none;
+        padding: 0.75rem 1.75rem;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+    .delete-btn:hover { background: #5a0c0e; }
+
+    .flash-msg {
+        padding: 0.85rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    .flash-success { background: #dcfce7; color: #166534; }
+    .flash-error { background: #fee2e2; color: #991b1b; }
+{% endblock %}
+
+{% block content %}
+    <section class="manage-page">
+        <div class="manage-container">
+
+            <a href="{{ url_for('admin') }}" class="back-link">← Back to Admin Panel</a>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <div class="flash-msg flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endwith %}
+
+            <div class="manage-header">
+                <h1>{{ user.full_name }}</h1>
+                <p>{{ email }}</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('admin_user_update') }}">
+                <input type="hidden" name="original_email" value="{{ email }}">
+
+                <!-- Login Credentials -->
+                <div class="panel">
+                    <h2>Login Credentials</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" name="full_name" value="{{ user.full_name }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" name="email" value="{{ email }}">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Password (leave blank to keep current)</label>
+                            <input type="text" name="password" value="{{ user.password }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <input type="text" value="{{ user.role|capitalize }}" disabled style="background:#f1f5f9;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bank Account Details -->
+                <div class="panel">
+                    <h2>Bank Account Details</h2>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Account Number</label>
+                            <input type="text" name="account_number" value="{{ user.account.account_number }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Account Type</label>
+                            <select name="account_type">
+                                {% set types = ["Savings Account", "Current Account", "Student Account", "Business Account", "Administrative"] %}
+                                {% for t in types %}
+                                    <option value="{{ t }}" {% if user.account.account_type == t %}selected{% endif %}>{{ t }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Account Status</label>
+                            <select name="account_status">
+                                {% set statuses = ["Active", "Inactive", "Pending"] %}
+                                {% for s in statuses %}
+                                    <option value="{{ s }}" {% if user.account.account_status == s %}selected{% endif %}>{{ s }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Balance (GHS)</label>
+                            <input type="text" name="balance" value="{{ user.account.balance }}">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Branch</label>
+                            <input type="text" name="branch" value="{{ user.account.branch }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Date Opened</label>
+                            <input type="text" value="{{ user.account.date_opened }}" disabled style="background:#f1f5f9;">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" name="phone" value="{{ user.account.phone }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Ghana Card</label>
+                            <input type="text" name="ghana_card" value="{{ user.account.ghana_card }}">
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button type="submit" class="save-btn">Save Changes</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Delete Section (hidden for main admin) -->
+            {% if email != 'admin@gnbank.com' and email != current_admin %}
+            <div class="danger-panel">
+                <h2>Delete This Account</h2>
+                <p>This action is permanent and cannot be undone. All login credentials and bank details for this account will be removed.</p>
+                <form method="POST" action="{{ url_for('admin_user_delete') }}" onsubmit="return confirm('Are you sure you want to permanently delete {{ email }}?');">
+                    <input type="hidden" name="email" value="{{ email }}">
+                    <button type="submit" class="delete-btn">Delete Account Permanently</button>
+                </form>
+            </div>
+            {% endif %}
+
+        </div>
+    </section>
+{% endblock %}

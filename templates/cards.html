@@ -1,0 +1,600 @@
+{% extends "base.html" %}
+
+{% block title %}My Cards — GN Bank{% endblock %}
+
+{% block styles %}
+    header, footer { display: none !important; }
+    main { background: #f1f5f9; }
+
+    .app-shell {
+        max-width: 480px;
+        margin: 0 auto;
+        background: #f1f5f9;
+        min-height: 100vh;
+        padding-bottom: 60px;
+        position: relative;
+    }
+
+    /* ---------- Top Bar ---------- */
+    .app-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        background: #ffffff;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .back-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #334155;
+        text-decoration: none;
+    }
+    .back-btn:hover { background: #e2e8f0; }
+    .app-topbar h1 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .topbar-spacer { width: 36px; }
+
+    /* ---------- Page Intro ---------- */
+    .page-intro {
+        padding: 1.5rem 1.25rem 0.5rem 1.25rem;
+    }
+    .page-intro h2 {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 0.35rem;
+    }
+    .page-intro p {
+        font-size: 0.88rem;
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    /* ---------- Card Options ---------- */
+    .card-options {
+        padding: 1rem 1.25rem 0 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .card-option {
+        border-radius: 18px;
+        padding: 1.25rem;
+        color: #ffffff;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+        border: 2px solid transparent;
+    }
+    .card-option:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(15, 23, 42, 0.18);
+    }
+    .card-option.selected {
+        border-color: #facc15;
+        box-shadow: 0 15px 35px rgba(250, 204, 21, 0.3);
+    }
+    .card-option::before {
+        content: "";
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 160px;
+        height: 160px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+    }
+    .card-option .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        position: relative;
+        z-index: 2;
+        margin-bottom: 2.5rem;
+    }
+    .card-option .chip {
+        width: 40px;
+        height: 30px;
+        border-radius: 6px;
+        background: linear-gradient(135deg, #fbbf24, #d97706);
+        position: relative;
+    }
+    .card-option .chip::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 4px;
+        right: 4px;
+        height: 1px;
+        background: rgba(0,0,0,0.2);
+        transform: translateY(-50%);
+    }
+    .card-option .brand-mark {
+        font-size: 1.05rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+    .card-option .card-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        position: relative;
+        z-index: 2;
+        gap: 0.5rem;
+    }
+    .card-option .card-number {
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+        letter-spacing: 2px;
+        font-weight: 700;
+    }
+    .card-option .card-label {
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: rgba(255, 255, 255, 0.75);
+        margin-bottom: 0.2rem;
+    }
+    .card-option .brand-tag {
+        font-size: 0.65rem;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+    }
+
+    /* Card brand gradients */
+    .card-mastercard {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    }
+    .card-visa {
+        background: linear-gradient(135deg, #1a1f71 0%, #2a4bc4 100%);
+    }
+    .card-ghlink {
+        background: linear-gradient(135deg, #7b1113 0%, #b91c1c 60%, #991b1b 100%);
+    }
+
+    /* Selection indicator */
+    .select-indicator {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid rgba(255,255,255,0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 3;
+        transition: background 0.15s ease;
+    }
+    .card-option.selected .select-indicator {
+        background: #facc15;
+        border-color: #facc15;
+        color: #78350f;
+        font-weight: 900;
+    }
+
+    /* ---------- Info Sections ---------- */
+    .info-card {
+        background: #ffffff;
+        margin: 1.25rem 1.25rem 0 1.25rem;
+        border-radius: 16px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+    }
+    .info-card .card-title {
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 1.3px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .info-card .card-title::before {
+        content: "";
+        width: 4px;
+        height: 14px;
+        background: #7b1113;
+        border-radius: 2px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.7rem 0;
+        border-bottom: 1px solid #f1f5f9;
+        gap: 0.75rem;
+        font-size: 0.88rem;
+    }
+    .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .info-row .label { color: #64748b; }
+    .info-row .value { color: #1e293b; font-weight: 700; text-align: right; }
+    .info-row .value.green { color: #16a34a; }
+    .info-row .value.red { color: #dc2626; }
+    .info-row .value.muted {
+        color: #94a3b8;
+        font-weight: 600;
+        font-style: italic;
+    }
+
+    /* ---------- Transaction History (Pale / Locked) ---------- */
+    .tx-wrapper {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .tx-pale {
+        filter: blur(1px) grayscale(0.7);
+        opacity: 0.35;
+        pointer-events: none;
+        user-select: none;
+    }
+    .tx-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.55);
+        backdrop-filter: blur(2px);
+        gap: 0.5rem;
+    }
+    .tx-overlay .lock-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: #64748b;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+    .tx-overlay h4 {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+    }
+    .tx-overlay p {
+        font-size: 0.78rem;
+        color: #64748b;
+        margin: 0;
+        max-width: 240px;
+        line-height: 1.5;
+    }
+
+    .tx-item {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .tx-item:last-child { border-bottom: none; }
+    .tx-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+    .tx-icon.debit { background: #fee2e2; color: #991b1b; }
+    .tx-icon.credit { background: #dcfce7; color: #166534; }
+    .tx-info { flex: 1; }
+    .tx-info .merchant {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .tx-info .date {
+        font-size: 0.72rem;
+        color: #94a3b8;
+    }
+    .tx-amount {
+        font-size: 0.9rem;
+        font-weight: 800;
+        text-align: right;
+    }
+    .tx-amount.debit { color: #dc2626; }
+    .tx-amount.credit { color: #16a34a; }
+
+    /* ---------- Note Box ---------- */
+    .info-note {
+        margin: 1.25rem 1.25rem 0 1.25rem;
+        background: #eff6ff;
+        border-left: 4px solid #2563eb;
+        border-radius: 10px;
+        padding: 1rem 1.15rem;
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+    .info-note .icon { font-size: 1.1rem; flex-shrink: 0; }
+    .info-note p {
+        font-size: 0.82rem;
+        color: #1e3a8a;
+        line-height: 1.55;
+        margin: 0;
+    }
+
+    /* ---------- Proceed Button ---------- */
+    .proceed-wrap {
+        padding: 1.5rem 1.25rem 2rem 1.25rem;
+    }
+    .proceed-btn {
+        width: 100%;
+        background: #7b1113;
+        color: #ffffff;
+        border: none;
+        padding: 1rem;
+        border-radius: 999px;
+        font-weight: 800;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.15s ease, opacity 0.15s ease;
+        box-shadow: 0 8px 20px rgba(123, 17, 19, 0.25);
+    }
+    .proceed-btn:hover { background: #5a0c0e; }
+    .proceed-btn:disabled {
+        background: #cbd5e1;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+    .proceed-hint {
+        text-align: center;
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-top: 0.75rem;
+    }
+{% endblock %}
+
+{% block content %}
+    <div class="app-shell">
+
+        <!-- Top Bar -->
+        <div class="app-topbar">
+            <a href="{{ url_for('dashboard') }}" class="back-btn">←</a>
+            <h1>My Cards</h1>
+            <div class="topbar-spacer"></div>
+        </div>
+
+        <!-- Page Intro -->
+        <div class="page-intro">
+            <h2>Order a Card</h2>
+            <p>Choose a card below to request it. Your details will be sent to our team for processing.</p>
+        </div>
+
+        <!-- Card Options -->
+        <div class="card-options">
+
+            <!-- Mastercard -->
+            <div class="card-option card-mastercard" data-card="Mastercard" onclick="selectCard(this)">
+                <div class="select-indicator"></div>
+                <div class="card-top">
+                    <div class="chip"></div>
+                    <div class="brand-mark">Mastercard</div>
+                </div>
+                <div class="card-bottom">
+                    <div>
+                        <div class="card-label">Card Number</div>
+                        <div class="card-number">•••• •••• •••• 4782</div>
+                    </div>
+                    <div class="brand-tag">Debit</div>
+                </div>
+            </div>
+
+            <!-- Visa Card -->
+            <div class="card-option card-visa" data-card="Visa" onclick="selectCard(this)">
+                <div class="select-indicator"></div>
+                <div class="card-top">
+                    <div class="chip"></div>
+                    <div class="brand-mark">VISA</div>
+                </div>
+                <div class="card-bottom">
+                    <div>
+                        <div class="card-label">Card Number</div>
+                        <div class="card-number">•••• •••• •••• 9014</div>
+                    </div>
+                    <div class="brand-tag">Debit</div>
+                </div>
+            </div>
+
+            <!-- GH-Link -->
+            <div class="card-option card-ghlink" data-card="Gh-Link" onclick="selectCard(this)">
+                <div class="select-indicator"></div>
+                <div class="card-top">
+                    <div class="chip"></div>
+                    <div class="brand-mark">Gh-Link</div>
+                </div>
+                <div class="card-bottom">
+                    <div>
+                        <div class="card-label">Card Number</div>
+                        <div class="card-number">•••• •••• •••• 3345</div>
+                    </div>
+                    <div class="brand-tag">Local</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Monthly Debit Information -->
+        <div class="info-card">
+            <div class="card-title">Monthly Debit & Fees</div>
+            <div class="info-row">
+                <span class="label">Monthly Maintenance Fee</span>
+                <span class="value red">GHS 5.00</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Card Replacement Fee</span>
+                <span class="value red">GHS 30.00</span>
+            </div>
+            <div class="info-row">
+                <span class="label">ATM Withdrawal (GN Bank)</span>
+                <span class="value green">Free</span>
+            </div>
+            <div class="info-row">
+                <span class="label">ATM Withdrawal (Other Banks)</span>
+                <span class="value red">GHS 2.50</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Debit Schedule</span>
+                <span class="value">End of every month</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Next Auto-Debit</span>
+                <span class="value muted">Unavailable for now</span>
+            </div>
+        </div>
+
+        <!-- Transaction History (Pale / Locked) -->
+        <div class="info-card">
+            <div class="card-title">Recent Card Activity</div>
+
+            <div class="tx-wrapper">
+                <!-- Pale, locked content -->
+                <div class="tx-pale">
+                    <div class="tx-item">
+                        <div class="tx-icon debit">🛒</div>
+                        <div class="tx-info">
+                            <div class="merchant">Melcom Supermarket</div>
+                            <div class="date">12 Oct 2026 • 14:22</div>
+                        </div>
+                        <div class="tx-amount debit">- GHS 245.00</div>
+                    </div>
+
+                    <div class="tx-item">
+                        <div class="tx-icon credit">💰</div>
+                        <div class="tx-info">
+                            <div class="merchant">Salary Credit — Ministry of Finance</div>
+                            <div class="date">11 Oct 2026 • 08:00</div>
+                        </div>
+                        <div class="tx-amount credit">+ GHS 4,850.00</div>
+                    </div>
+
+                    <div class="tx-item">
+                        <div class="tx-icon debit">⛽</div>
+                        <div class="tx-info">
+                            <div class="merchant">Total Fuel Station</div>
+                            <div class="date">10 Oct 2026 • 17:45</div>
+                        </div>
+                        <div class="tx-amount debit">- GHS 180.00</div>
+                    </div>
+
+                    <div class="tx-item">
+                        <div class="tx-icon debit">📱</div>
+                        <div class="tx-info">
+                            <div class="merchant">MTN Airtime Top-up</div>
+                            <div class="date">09 Oct 2026 • 19:12</div>
+                        </div>
+                        <div class="tx-amount debit">- GHS 50.00</div>
+                    </div>
+
+                    <div class="tx-item">
+                        <div class="tx-icon debit">📶</div>
+                        <div class="tx-info">
+                            <div class="merchant">Monthly Card Fee</div>
+                            <div class="date">30 Sep 2026 • 00:01</div>
+                        </div>
+                        <div class="tx-amount debit">- GHS 5.00</div>
+                    </div>
+                </div>
+
+                <!-- Overlay message -->
+                <div class="tx-overlay">
+                    <div class="lock-icon">🔒</div>
+                    <h4>No Card Activity Yet</h4>
+                    <p>Card transactions will appear here once your debit card has been issued and activated.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Note -->
+        <div class="info-note">
+            <span class="icon">ℹ️</span>
+            <p>When you proceed, your name, email, and account number will be included in the card request email sent to our team. A representative will contact you within 2–3 working days to finalise your order.</p>
+        </div>
+
+        <!-- Proceed Button -->
+        <div class="proceed-wrap">
+            <button class="proceed-btn" id="proceedBtn" onclick="proceedRequest()" disabled>
+                Proceed to Order
+            </button>
+            <div class="proceed-hint">Select a card above to continue</div>
+        </div>
+
+    </div>
+
+    <script>
+        const SIM_EMAIL = "cards@gnbank.com";
+        const USER_NAME = "{{ user.full_name }}";
+        const USER_EMAIL = "{{ email }}";
+        const ACCOUNT_NUMBER = "{{ user.account.account_number }}";
+        const ACCOUNT_TYPE = "{{ user.account.account_type }}";
+
+        let selectedCard = null;
+
+        function selectCard(el) {
+            document.querySelectorAll('.card-option').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedCard = el.getAttribute('data-card');
+            const btn = document.getElementById('proceedBtn');
+            btn.disabled = false;
+            btn.textContent = `Order ${selectedCard} Card`;
+            document.querySelector('.proceed-hint').textContent = `You selected: ${selectedCard}`;
+        }
+
+        function proceedRequest() {
+            if (!selectedCard) return;
+
+            const subject = `Credit Card Request — ${selectedCard}`;
+            const body =
+                `Dear GN Bank Team,\n\n` +
+                `I would like to formally request a new ${selectedCard} card for my account.\n\n` +
+                `--- CUSTOMER DETAILS ---\n` +
+                `Full Name: ${USER_NAME}\n` +
+                `Email: ${USER_EMAIL}\n` +
+                `Account Number: ${ACCOUNT_NUMBER}\n` +
+                `Account Type: ${ACCOUNT_TYPE}\n` +
+                `Card Requested: ${selectedCard}\n` +
+                `Request Date: ${new Date().toLocaleString()}\n\n` +
+                `--- AGREEMENT ---\n` +
+                `I acknowledge the monthly maintenance fee of GHS 5.00 and understand that all applicable card fees will be debited from my account automatically.\n\n` +
+                `Please process my card request at your earliest convenience.\n\n` +
+                `Thank you,\n` +
+                `${USER_NAME}`;
+
+            const mailto = `mailto:${SIM_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailto;
+        }
+    </script>
+{% endblock %}

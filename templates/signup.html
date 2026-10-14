@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up — GN Bank{% endblock %}
+
+{% block styles %}
+    .signup-page {
+        background: #f1f5f9;
+        padding: 4rem 1.5rem;
+        min-height: 80vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+    .signup-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 650px;
+        padding: 3rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+        border-top: 6px solid #7b1113;
+    }
+    .signup-card h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1e1b4b;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+    .signup-card .subtitle {
+        text-align: center;
+        color: #64748b;
+        margin-bottom: 2rem;
+        font-size: 1rem;
+    }
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #1e1b4b;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: inherit;
+        color: #1e293b;
+        background: #ffffff;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #7b1113;
+        box-shadow: 0 0 0 3px rgba(123, 17, 19, 0.1);
+    }
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    .submit-btn {
+        width: 100%;
+        background: #7b1113;
+        color: #ffffff;
+        border: none;
+        padding: 1rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 1.05rem;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: background .15s ease;
+    }
+    .submit-btn:hover {
+        background: #5a0c0e;
+    }
+    .login-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.95rem;
+        color: #64748b;
+    }
+    .login-link a {
+        color: #7b1113;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+    @media (max-width: 600px) {
+        .signup-page { padding: 2rem 1rem; }
+        .signup-card { padding: 2rem 1.5rem; }
+        .signup-card h1 { font-size: 1.6rem; }
+        .form-row { grid-template-columns: 1fr; }
+    }
+{% endblock %}
+
+{% block content %}
+    <section class="signup-page">
+        <div class="signup-card">
+            <h1>Open an Account</h1>
+            <p class="subtitle">Join over 1 million customers banking securely with GN Bank.</p>
+            
+            <form method="POST" action="{{ url_for('signup') }}">
+                <div class="form-group">
+                    <label for="full_name">Full Name (as it appears on your ID)</label>
+                    <input type="text" id="full_name" name="full_name" placeholder="e.g. Kwame Mensah" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="e.g. 024XXXXXXX" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ghana_card">Ghana Card Number</label>
+                    <input type="text" id="ghana_card" name="ghana_card" placeholder="e.g. GHA-123456789-0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="account_type">Account Type</label>
+                    <select id="account_type" name="account_type" required>
+                        <option value="" disabled selected>Select an account type</option>
+                        <option value="savings">Savings Account</option>
+                        <option value="current">Current Account</option>
+                        <option value="student">Student Account</option>
+                        <option value="business">Business Account</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Create a password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Repeat password" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Submit Application</button>
+            </form>
+
+            <p class="login-link">
+                Already have an account? <a href="#">Log in</a>
+            </p>
+        </div>
+    </section>
+{% endblock %}

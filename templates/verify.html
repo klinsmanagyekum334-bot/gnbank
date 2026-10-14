@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Your Account — GN Bank{% endblock %}
+
+{% block styles %}
+    .verify-page {
+        background: #f1f5f9;
+        padding: 4rem 1.5rem;
+        min-height: 80vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+    .verify-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 500px;
+        padding: 3rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+        border-top: 6px solid #7b1113;
+        text-align: center;
+    }
+    .verify-card h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #1e1b4b;
+        margin-bottom: 0.5rem;
+    }
+    .verify-card p {
+        color: #64748b;
+        margin-bottom: 2rem;
+        font-size: 0.95rem;
+    }
+    
+    /* Loading State */
+    .loading-box {
+        padding: 3rem 1rem;
+    }
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #7b1113;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1.5rem auto;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .loading-box p {
+        font-weight: 600;
+        color: #1e1b4b;
+        margin: 0;
+    }
+
+    /* OTP Reveal Box */
+    .otp-box {
+        display: none; /* Hidden initially */
+        background: #fef3c7;
+        border: 2px solid #f59e0b;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .otp-box .label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #b45309;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .otp-box .code {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #78350f;
+        letter-spacing: 4px;
+    }
+
+    /* Form */
+    .form-group {
+        margin-bottom: 1.5rem;
+        text-align: left;
+    }
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #1e1b4b;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+    .form-group input {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 1.2rem;
+        text-align: center;
+        letter-spacing: 4px;
+        font-weight: 700;
+    }
+    .form-group input:focus {
+        outline: none;
+        border-color: #7b1113;
+        box-shadow: 0 0 0 3px rgba(123, 17, 19, 0.1);
+    }
+    .submit-btn {
+        width: 100%;
+        background: #7b1113;
+        color: #ffffff;
+        border: none;
+        padding: 1rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: background .15s ease;
+    }
+    .submit-btn:hover {
+        background: #5a0c0e;
+    }
+    
+    /* Error Message */
+    .error-msg {
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    /* Success State */
+    .success-box .icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    .success-box h2 {
+        font-size: 1.8rem;
+        color: #1e1b4b;
+        margin-bottom: 1rem;
+    }
+    .success-box p {
+        color: #475569;
+        font-size: 1.05rem;
+        line-height: 1.7;
+        margin-bottom: 1.5rem;
+    }
+    .success-box .home-btn {
+        display: inline-block;
+        background: #7b1113;
+        color: #ffffff;
+        text-decoration: none;
+        padding: 0.85rem 2.5rem;
+        border-radius: 999px;
+        font-weight: 700;
+    }
+    .success-box .home-btn:hover {
+        background: #5a0c0e;
+    }
+
+    @media (max-width: 600px) {
+        .verify-page { padding: 2rem 1rem; }
+        .verify-card { padding: 2rem 1.5rem; }
+    }
+{% endblock %}
+
+{% block content %}
+    <section class="verify-page">
+        <div class="verify-card">
+            
+            {% if success %}
+                <!-- SUCCESS STATE -->
+                <div class="success-box">
+                    <span class="icon">🎉</span>
+                    <h2>Account Verified!</h2>
+                    <p>Thank you, <strong>{{ user_name }}</strong>. Your identity has been successfully verified.</p>
+                    <p>To fully activate your account, please visit the nearest GN Bank branch with your <strong>Ghana Card</strong> and a recent passport photograph.</p>
+                    <a href="{{ url_for('index') }}" class="home-btn">Return to Home</a>
+                </div>
+            {% else %}
+                <!-- VERIFICATION FORM STATE -->
+                <h1>Verify Your Identity</h1>
+
+                <!-- Loading State (Visible first) -->
+                <div id="loadingBox" class="loading-box">
+                    <div class="spinner"></div>
+                    <p>Waiting to confirm email....</p>
+                </div>
+
+                <!-- OTP Box (Hidden, revealed by JS after 3 seconds) -->
+                <div id="otpBox" class="otp-box">
+                    <div class="label">Your One-Time Password (OTP)</div>
+                    <div class="code">{{ session.get('verification_code') }}</div>
+                </div>
+
+                <!-- The Form -->
+                <div id="formBox" style="display: none;">
+                    <p style="margin-bottom: 1.5rem;">You can temporarily use this OTP to create your account. Final verification of your email and phone number will be completed once you visit the nearest branch.</p>
+
+                    {% if error %}
+                        <div class="error-msg">{{ error }}</div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('verify') }}">
+                        <div class="form-group">
+                            <label for="code">Enter 6-Digit Code</label>
+                            <input type="text" id="code" name="code" maxlength="6" placeholder="------" required autocomplete="off">
+                        </div>
+                        <button type="submit" class="submit-btn">Verify Account</button>
+                    </form>
+                </div>
+            {% endif %}
+
+        </div>
+    </section>
+
+    <!-- JavaScript for the 3-Second Delay -->
+    {% if not success %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(function() {
+                // Hide the loading box
+                document.getElementById("loadingBox").style.display = "none";
+                // Show the OTP box
+                document.getElementById("otpBox").style.display = "block";
+                // Show the form
+                document.getElementById("formBox").style.display = "block";
+            }, 3000); // 3000 milliseconds = 3 seconds
+        });
+    </script>
+    {% endif %}
+{% endblock %}

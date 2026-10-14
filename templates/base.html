@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}GN Bank{% endblock %}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            background: #f4f6fb;
+            color: #1e293b;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ---------- Header ---------- */
+        header {
+            background: #ffffff;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,.1);
+            border-bottom: 1px solid #e2e8f0;
+            position: relative;
+            z-index: 10;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+        
+        /* Hamburger Menu Icon */
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 26px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .hamburger span {
+            display: block;
+            height: 2px;
+            width: 100%;
+            background: #7b1113;
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #7b1113;
+        }
+        .brand img.logo {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+        }
+        .brand .brand-name {
+            font-weight: 700;
+            font-size: 1.3rem;
+            letter-spacing: .5px;
+            color: #7b1113;
+        }
+
+        /* Login Button */
+        header nav {
+            display: flex;
+            align-items: center;
+        }
+        .login-btn {
+            background: #7b1113;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: background .15s ease;
+        }
+        .login-btn:hover {
+            background: #5a0c0e;
+        }
+
+        /* ---------- Side Menu (Hamburger Menu) ---------- */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .menu-overlay.open {
+            visibility: visible;
+            opacity: 1;
+        }
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100%;
+            background: #0f172a;
+            color: #ffffff;
+            z-index: 100;
+            transition: left 0.3s ease;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+        }
+        .side-menu.open {
+            left: 0;
+        }
+        .side-menu .close-btn {
+            align-self: flex-end;
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        .side-menu .close-btn:hover {
+            color: #facc15;
+        }
+        .side-menu a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: color 0.2s, padding-left 0.2s;
+        }
+        .side-menu a:hover {
+            color: #facc15;
+            padding-left: 5px;
+        }
+
+        /* ---------- Main ---------- */
+        main {
+            flex: 1;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ---------- Footer (Dark Dummy) ---------- */
+        footer {
+            background: #0f172a;
+            color: #cbd5e1;
+            padding: 3rem 1.5rem;
+            font-size: 0.95rem;
+        }
+        .footer-grid {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 3rem;
+        }
+        .footer-col {
+            display: flex;
+            flex-direction: column;
+        }
+        .footer-col h2 {
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .footer-col p {
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            color: #94a3b8;
+        }
+        .footer-heading {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            border-bottom: 2px solid #facc15;
+            padding-bottom: 4px;
+            width: fit-content;
+        }
+        .footer-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.6rem;
+            color: #cbd5e1;
+            cursor: default;
+        }
+        .footer-item .icon {
+            color: #facc15;
+            font-size: 0.85rem;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 1rem;
+        }
+        .social-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .app-badges {
+            display: flex;
+            gap: 10px;
+            margin-top: 0.5rem;
+        }
+        .app-badge {
+            background: #000;
+            border: 1px solid #ffffff;
+            border-radius: 6px;
+            padding: 6px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #ffffff;
+            font-size: 0.65rem;
+        }
+        .app-badge span:last-child {
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        {% block styles %}{% endblock %}
+    </style>
+</head>
+<body>
+    <!-- Side Menu Overlay -->
+    <div class="menu-overlay" onclick="toggleMenu()"></div>
+
+    <!-- Side Menu Drawer -->
+    <nav class="side-menu" id="sideMenu">
+        <button class="close-btn" onclick="toggleMenu()">&times;</button>
+        
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('about') }}">About Us</a>
+        <a href="{{ url_for('signup') }}">Sign Up</a>
+        <a href="{{ url_for('terms') }}">Terms and Condition</a>
+        <a href="{{ url_for('support') }}">Customer Support center</a>
+    </nav>
+
+    <header>
+        <div class="header-left">
+            <!-- Hamburger Menu Icon -->
+            <div class="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <!-- Brand/Logo -->
+            <a href="{{ url_for('index') }}" class="brand">
+                <img src="{{ url_for('static', filename='uploads/logo.jpg') }}"
+                     alt="GN Bank logo"
+                     class="logo">
+                <span class="brand-name">GN Bank</span>
+            </a>
+        </div>
+        <nav>
+            <a href="{{ url_for('login') }}" class="login-btn">Log in</a>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Dummy Footer -->
+    <footer>
+        <div class="footer-grid">
+            
+            <!-- Column 1: About & App -->
+            <div class="footer-col">
+                <h2>GN Bank</h2>
+                <p>Your trusted partner in financial success. Serving our community for over 90 years.</p>
+                
+                <div class="footer-heading">Contact Us</div>
+                <div class="footer-item"><span class="icon">📍</span> Find a Location Near You</div>
+                <div class="footer-item"><span class="icon">📞</span> Contact Customer Service</div>
+                
+                <div class="footer-heading">Follow Us</div>
+                <div class="social-icons">
+                    <div class="social-icon">FB</div>
+                    <div class="social-icon">TW</div>
+                    <div class="social-icon">LI</div>
+                    <div class="social-icon">IG</div>
+                </div>
+                
+                <div class="footer-heading">Download The GN Bank App</div>
+                <div class="app-badges">
+                    <div class="app-badge">
+                        <span>GET IT ON</span>
+                        <span>Google Play</span>
+                    </div>
+                    <div class="app-badge">
+                        <span>Download on the</span>
+                        <span>App Store</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column 2: Banking & Products -->
+            <div class="footer-col">
+                <div class="footer-heading">Banking</div>
+                <div class="footer-item">📱 Mobile Banking</div>
+                <div class="footer-item">💻 Online Banking</div>
+                <div class="footer-item">🧾 E-Bill Pay</div>
+                <div class="footer-item">Checking Accounts</div>
+                <div class="footer-item">Savings Accounts</div>
+
+                <div class="footer-heading">Products</div>
+                <div class="footer-item">Auto Loans</div>
+                <div class="footer-item">Home Loans</div>
+                <div class="footer-item">Credit Cards</div>
+                <div class="footer-item">Business Banking</div>
+                <div class="footer-item">Find ATM</div>
+            </div>
+
+            <!-- Column 3: Support & About -->
+            <div class="footer-col">
+                <div class="footer-heading">Support</div>
+                <div class="footer-item">Contact Us</div>
+                <div class="footer-item">Lost or Stolen Card</div>
+                <div class="footer-item">🛡️ Fraud Protection</div>
+                <div class="footer-item">🔒 Privacy Policy</div>
+                <div class="footer-item">Fee Disclosure</div>
+                <div class="footer-item">Terms & Conditions</div>
+
+                <div class="footer-heading">About</div>
+                <div class="footer-item">About GN Bank</div>
+                <div class="footer-item">News & Updates</div>
+                <div class="footer-item">Branch Locations</div>
+                <div class="footer-item">Careers</div>
+            </div>
+            
+        </div>
+    </footer>
+
+    <!-- JavaScript to Toggle the Menu -->
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById('sideMenu');
+            const overlay = document.querySelector('.menu-overlay');
+            menu.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
