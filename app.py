@@ -4,83 +4,112 @@ from pathlib import Path
 from datetime import datetime
 from flask import Flask, render_template, request, session, redirect, url_for, flash
 
+import firebase_admin
+from firebase_admin import credentials, firestore
+
 app = Flask(__name__)
 app.secret_key = "dev-secret-key-change-me"
 
-USERS_FILE = Path(__file__).resolve().parent / "users.json"
+# --------------------------------------------------------------------------
+# Firebase Initialization
+# --------------------------------------------------------------------------
+BASE_DIR = Path(__file__).resolve().parent
+SERVICE_ACCOUNT_FILE = BASE_DIR / "serviceAccountKey.json"
+
+cred = credentials.Certificate(str(SERVICE_ACCOUNT_FILE))
+firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+USERS_COLLECTION = db.collection("users")
 
 
 # --------------------------------------------------------------------------
-# User Storage Helpers
+# User Storage Helpers (Firestore)
 # --------------------------------------------------------------------------
-def generate_account_number(users):
-    """Generate a unique 10-digit account number."""
+def generate_account_number():
+    """Generate a unique 10-digit account number that no existing user has."""
     while True:
         num = str(random.randint(1000000000, 9999999999))
-        exists = any(u.get("account", {}).get("account_number") == num for u in users.values())
-        if not exists:
+        # Query Firestore for any user with this account number
+        query = USERS_COLLECTION.where("account.account_number", "==", num).limit(1).stream()
+        if not any(query):
             return num
 
 
+def load_user(email):
+    """Fetch a single user document by email (used as document ID)."""
+    doc = USERS_COLLECTION.document(email).get()
+    if doc.exists:
+        return doc.to_dict()
+    return None
+
+
 def load_users():
-    if USERS_FILE.exists():
-        with open(USERS_FILE, "r") as f:
-            return json.load(f)
-    return {}
+    """Fetch all users as a dictionary {email: user_dict}."""
+    result = {}
+    for doc in USERS_COLLECTION.stream():
+        result[doc.id] = doc.to_dict()
+    return result
 
 
-def save_users(users):
-    with open(USERS_FILE, "w") as f:
-        json.dump(users, f, indent=2)
+def save_user(email, user_data):
+    """Save (create or overwrite) a single user."""
+    USERS_COLLECTION.document(email).set(user_data)
+
+
+def delete_user(email):
+    """Remove a user document."""
+    USERS_COLLECTION.document(email).delete()
 
 
 def init_users():
-    if not USERS_FILE.exists():
+    """Create default admin and demo users if the collection is empty."""
+    if not any(USERS_COLLECTION.limit(1).stream()):
         today = datetime.now().strftime("%Y-%m-%d")
-        default_users = {
-            "admin@gnbank.com": {
-                "password": "admin1234",
-                "full_name": "System Administrator",
-                "role": "admin",
-                "created_by_admin": False,
-                "account": {
-                    "account_number": "0000000001",
-                    "account_type": "Administrative",
-                    "account_status": "Active",
-                    "branch": "Head Office",
-                    "balance": "0.00",
-                    "currency": "GHS",
-                    "date_opened": today,
-                    "phone": "030221199",
-                    "ghana_card": "N/A",
-                    "address": "Head Office, Accra",
-                    "email": "admin@gnbank.com"
-                },
-                "transactions": []
+
+        save_user("admin@gnbank.com", {
+            "password": "admin1234",
+            "full_name": "System Administrator",
+            "role": "admin",
+            "created_by_admin": False,
+            "account": {
+                "account_number": "0000000001",
+                "account_type": "Administrative",
+                "account_status": "Active",
+                "branch": "Head Office",
+                "balance": "0.00",
+                "currency": "GHS",
+                "date_opened": today,
+                "phone": "030221199",
+                "ghana_card": "N/A",
+                "address": "Head Office, Accra",
+                "email": "admin@gnbank.com"
             },
-            "demo@gnbank.com": {
-                "password": "demo1234",
-                "full_name": "Demo Customer",
-                "role": "customer",
-                "created_by_admin": False,
-                "account": {
-                    "account_number": "1234567890",
-                    "account_type": "Savings Account",
-                    "account_status": "Active",
-                    "branch": "Accra Main Branch",
-                    "balance": "1500.00",
-                    "currency": "GHS",
-                    "date_opened": today,
-                    "phone": "0244000000",
-                    "ghana_card": "GHA-000000000-0",
-                    "address": "12 Ring Road, Accra",
-                    "email": "demo@gnbank.com"
-                },
-                "transactions": []
-            }
-        }
-        save_users(default_users)
-        print("Created default users: admin@gnbank.com / demo@gnbank.com")
+            "transactions": []
+        })
+
+        save_user("demo@gnbank.com", {
+            "password": "demo1234",
+            "full_name": "Demo Customer",
+            "role": "customer",
+            "created_by_admin": False,
+            "account": {
+                "account_number": "1234567890",
+                "account_type": "Savings Account",
+                "account_status": "Active",
+                "branch": "Accra Main Branch",
+                "balance": "1500.00",
+                "currency": "GHS",
+                "date_opened": today,
+                "phone": "0244000000",
+                "ghana_card": "GHA-000000000-0",
+                "address": "12 Ring Road, Accra",
+                "email": "demo@gnbank.com"
+            },
+            "transactions": []
+        })
+
+        print("Created default users in Firebase: admin@gnbank.com / demo@gnbank.com")
 
 
 # --------------------------------------------------------------------------
@@ -160,15 +189,15 @@ def login():
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
 
-        users = load_users()
+        user = load_user(email)
 
-        if email in users and users[email]["password"] == password:
+        if user and user.get("password") == password:
             session["user"] = {
                 "email": email,
-                "full_name": users[email]["full_name"],
-                "role": users[email]["role"]
+                "full_name": user["full_name"],
+                "role": user["role"]
             }
-            if users[email]["role"] == "admin":
+            if user["role"] == "admin":
                 return redirect(url_for("admin"))
             return redirect(url_for("dashboard"))
         else:
@@ -193,14 +222,13 @@ def dashboard():
     if session["user"]["role"] == "admin":
         return redirect(url_for("admin"))
 
-    users = load_users()
     user_email = session["user"]["email"]
+    user_data = load_user(user_email)
 
-    if user_email not in users:
+    if not user_data:
         session.clear()
         return redirect(url_for("login"))
 
-    user_data = users[user_email]
     return render_template("dashboard.html", user=user_data, email=user_email)
 
 
@@ -214,14 +242,14 @@ def account_info():
     if session["user"]["role"] == "admin":
         return redirect(url_for("admin"))
 
-    users = load_users()
     user_email = session["user"]["email"]
+    user_data = load_user(user_email)
 
-    if user_email not in users:
+    if not user_data:
         session.clear()
         return redirect(url_for("login"))
 
-    return render_template("account_info.html", user=users[user_email], email=user_email)
+    return render_template("account_info.html", user=user_data, email=user_email)
 
 
 # --------------------------------------------------------------------------
@@ -234,14 +262,14 @@ def send_money():
     if session["user"]["role"] == "admin":
         return redirect(url_for("admin"))
 
-    users = load_users()
     user_email = session["user"]["email"]
+    user_data = load_user(user_email)
 
-    if user_email not in users:
+    if not user_data:
         session.clear()
         return redirect(url_for("login"))
 
-    return render_template("send_money.html", user=users[user_email], email=user_email)
+    return render_template("send_money.html", user=user_data, email=user_email)
 
 
 # --------------------------------------------------------------------------
@@ -254,14 +282,14 @@ def cards():
     if session["user"]["role"] == "admin":
         return redirect(url_for("admin"))
 
-    users = load_users()
     user_email = session["user"]["email"]
+    user_data = load_user(user_email)
 
-    if user_email not in users:
+    if not user_data:
         session.clear()
         return redirect(url_for("login"))
 
-    return render_template("cards.html", user=users[user_email], email=user_email)
+    return render_template("cards.html", user=user_data, email=user_email)
 
 
 # --------------------------------------------------------------------------
@@ -274,17 +302,17 @@ def history():
     if session["user"]["role"] == "admin":
         return redirect(url_for("admin"))
 
-    users = load_users()
     user_email = session["user"]["email"]
+    user_data = load_user(user_email)
 
-    if user_email not in users:
+    if not user_data:
         session.clear()
         return redirect(url_for("login"))
 
-    transactions = users[user_email].get("transactions", [])
+    transactions = user_data.get("transactions", [])
     return render_template(
         "history.html",
-        user=users[user_email],
+        user=user_data,
         email=user_email,
         transactions=transactions
     )
@@ -314,16 +342,15 @@ def admin_create_user():
         flash("Name, email and password are required.", "error")
         return redirect(url_for("admin"))
 
-    users = load_users()
-    if email in users:
+    if load_user(email):
         flash(f"User {email} already exists.", "error")
         return redirect(url_for("admin"))
 
     today = datetime.now().strftime("%Y-%m-%d")
-    account_number = request.form.get("account_number", "").strip() or generate_account_number(users)
+    account_number = request.form.get("account_number", "").strip() or generate_account_number()
     opening_balance = request.form.get("balance", "0.00").strip() or "0.00"
 
-    users[email] = {
+    new_user = {
         "password": password,
         "full_name": full_name,
         "role": "customer",
@@ -344,10 +371,9 @@ def admin_create_user():
         "transactions": []
     }
 
-    # If opening balance > 0, record as first credit
     try:
         if float(opening_balance) > 0:
-            users[email]["transactions"].insert(0, {
+            new_user["transactions"].insert(0, {
                 "id": str(random.randint(100000, 999999)),
                 "type": "credit",
                 "amount": f"{float(opening_balance):.2f}",
@@ -358,7 +384,7 @@ def admin_create_user():
     except ValueError:
         pass
 
-    save_users(users)
+    save_user(email, new_user)
     flash(f"Account created for {full_name}. Account Number: {account_number}", "success")
     return redirect(url_for("admin"))
 
@@ -369,16 +395,16 @@ def admin_user_view():
         return redirect(url_for("login"))
 
     email = request.args.get("email", "").strip().lower()
-    users = load_users()
+    user = load_user(email)
 
-    if email not in users:
+    if not user:
         flash("User not found.", "error")
         return redirect(url_for("admin"))
 
     return render_template(
         "admin_user.html",
         email=email,
-        user=users[email],
+        user=user,
         current_admin=session["user"]["email"]
     )
 
@@ -389,13 +415,11 @@ def admin_user_update():
         return redirect(url_for("login"))
 
     original_email = request.form.get("original_email", "").strip().lower()
-    users = load_users()
+    user = load_user(original_email)
 
-    if original_email not in users:
+    if not user:
         flash("User not found.", "error")
         return redirect(url_for("admin"))
-
-    user = users[original_email]
 
     new_email = request.form.get("email", "").strip().lower()
     new_password = request.form.get("password", "").strip()
@@ -419,17 +443,20 @@ def admin_user_update():
 
     final_email = original_email
     if new_email and new_email != original_email:
-        if new_email in users:
+        if load_user(new_email):
             flash(f"Cannot change email — {new_email} already exists.", "error")
             return redirect(url_for("admin_user_view", email=original_email))
-        users[new_email] = users.pop(original_email)
+        # Save under new email, delete old
+        user["account"]["email"] = new_email
+        save_user(new_email, user)
+        delete_user(original_email)
         final_email = new_email
-        users[final_email]["account"]["email"] = new_email
+    else:
+        save_user(original_email, user)
 
     if original_email == session["user"]["email"] and final_email != original_email:
         session["user"]["email"] = final_email
 
-    save_users(users)
     flash(f"Changes saved for {final_email}.", "success")
     return redirect(url_for("admin_user_view", email=final_email))
 
@@ -449,9 +476,7 @@ def admin_user_delete():
         flash("You cannot delete your own account while logged in.", "error")
         return redirect(url_for("admin"))
 
-    users = load_users()
-    users.pop(email, None)
-    save_users(users)
+    delete_user(email)
     flash(f"Account {email} has been deleted.", "success")
     return redirect(url_for("admin"))
 
@@ -468,8 +493,8 @@ def admin_balance_credit():
     amount_str = request.form.get("amount", "0").strip()
     note = request.form.get("note", "").strip() or "Credit from admin"
 
-    users = load_users()
-    if email not in users:
+    user = load_user(email)
+    if not user:
         flash("User not found.", "error")
         return redirect(url_for("admin"))
 
@@ -481,7 +506,6 @@ def admin_balance_credit():
         flash("Enter a valid amount.", "error")
         return redirect(url_for("admin_user_view", email=email))
 
-    user = users[email]
     current = float(user["account"].get("balance", "0"))
     new_balance = current + amount
     user["account"]["balance"] = f"{new_balance:.2f}"
@@ -495,8 +519,7 @@ def admin_balance_credit():
         "balance_after": f"{new_balance:.2f}"
     }
     user.setdefault("transactions", []).insert(0, tx)
-    users[email] = user
-    save_users(users)
+    save_user(email, user)
 
     flash(f"Credited GHS {amount:.2f} to {user['full_name']}.", "success")
     return redirect(url_for("admin_user_view", email=email))
@@ -511,8 +534,8 @@ def admin_balance_debit():
     amount_str = request.form.get("amount", "0").strip()
     note = request.form.get("note", "").strip() or "Debit from admin"
 
-    users = load_users()
-    if email not in users:
+    user = load_user(email)
+    if not user:
         flash("User not found.", "error")
         return redirect(url_for("admin"))
 
@@ -524,7 +547,6 @@ def admin_balance_debit():
         flash("Enter a valid amount.", "error")
         return redirect(url_for("admin_user_view", email=email))
 
-    user = users[email]
     current = float(user["account"].get("balance", "0"))
 
     if amount > current:
@@ -543,8 +565,7 @@ def admin_balance_debit():
         "balance_after": f"{new_balance:.2f}"
     }
     user.setdefault("transactions", []).insert(0, tx)
-    users[email] = user
-    save_users(users)
+    save_user(email, user)
 
     flash(f"Debited GHS {amount:.2f} from {user['full_name']}.", "success")
     return redirect(url_for("admin_user_view", email=email))
@@ -558,8 +579,8 @@ def admin_balance_edit():
     email = request.form.get("email", "").strip().lower()
     new_balance_str = request.form.get("new_balance", "0").strip()
 
-    users = load_users()
-    if email not in users:
+    user = load_user(email)
+    if not user:
         flash("User not found.", "error")
         return redirect(url_for("admin"))
 
@@ -571,11 +592,9 @@ def admin_balance_edit():
         flash("Enter a valid balance.", "error")
         return redirect(url_for("admin_user_view", email=email))
 
-    user = users[email]
     user["account"]["balance"] = f"{new_balance:.2f}"
     user["transactions"] = []   # Wipe history after edit
-    users[email] = user
-    save_users(users)
+    save_user(email, user)
 
     flash(f"Balance set to GHS {new_balance:.2f}. Transaction history cleared.", "success")
     return redirect(url_for("admin_user_view", email=email))
@@ -587,17 +606,15 @@ def admin_balance_delete():
         return redirect(url_for("login"))
 
     email = request.form.get("email", "").strip().lower()
-    users = load_users()
+    user = load_user(email)
 
-    if email not in users:
+    if not user:
         flash("User not found.", "error")
         return redirect(url_for("admin"))
 
-    user = users[email]
     user["account"]["balance"] = "0.00"
-    user["transactions"] = []   # Wipe history too
-    users[email] = user
-    save_users(users)
+    user["transactions"] = []
+    save_user(email, user)
 
     flash(f"Balance deleted for {user['full_name']}. History cleared.", "success")
     return redirect(url_for("admin_user_view", email=email))
