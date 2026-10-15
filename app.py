@@ -30,7 +30,6 @@ def generate_account_number():
     """Generate a unique 10-digit account number that no existing user has."""
     while True:
         num = str(random.randint(1000000000, 9999999999))
-        # Query Firestore for any user with this account number
         query = USERS_COLLECTION.where("account.account_number", "==", num).limit(1).stream()
         if not any(query):
             return num
@@ -53,7 +52,7 @@ def load_users():
 
 
 def save_user(email, user_data):
-    """Save (create or overwrite) a single user."""
+    """Save (create or overwrite) a single user document."""
     USERS_COLLECTION.document(email).set(user_data)
 
 
@@ -270,6 +269,141 @@ def send_money():
         return redirect(url_for("login"))
 
     return render_template("send_money.html", user=user_data, email=user_email)
+
+
+@app.route("/send_money/confirm", methods=["POST"])
+def send_money_confirm():
+    if not session.get("user"):
+        return redirect(url_for("login"))
+    if session["user"]["role"] == "admin":
+        return redirect(url_for("admin"))
+
+    user_email = session["user"]["email"]
+    user = load_user(user_email)
+
+    if not user:
+        session.clear()
+        return redirect(url_for("login"))
+
+    action = request.form.get("action", "Send Money").strip()
+    service = request.form.get("service", "").strip()
+    recipient_name = request.form.get("recipient_name", "").strip()
+    recipient_account = request.form.get("recipient_account", "").strip()
+    recipient_email = request.form.get("email", "").strip()
+    amount_str = request.form.get("amount", "0").strip()
+    password = request.form.get("password", "")
+    confirm_password = request.form.get("confirm_password", "")
+
+    source_account = user["account"].get("account_number", "")
+
+    # --- Validation ---
+    if not action or action not in ["Make Payments", "Send Money"]:
+        flash("Please select an action type.", "error")
+        return redirect(url_for("send_money"))
+
+    if not service:
+        flash("Please select a bank or service.", "error")
+        return redirect(url_for("send_money"))
+
+    if not recipient_name:
+        flash("Recipient name is required.", "error")
+        return redirect(url_for("send_money"))
+
+    if not recipient_account:
+        flash("Recipient account number is required.", "error")
+        return redirect(url_for("send_money"))
+
+    # Same-account check
+    if recipient_account == source_account:
+        flash("You cannot send money to your own account number.", "error")
+        return redirect(url_for("send_money"))
+
+    if not recipient_email or "@" not in recipient_email:
+        flash("Please enter a valid email address.", "error")
+        return redirect(url_for("send_money"))
+
+    if password != confirm_password:
+        flash("Passwords do not match.", "error")
+        return redirect(url_for("send_money"))
+
+    if not password:
+        flash("Password is required to authorise this transfer.", "error")
+        return redirect(url_for("send_money"))
+
+    # --- Amount validation ---
+    try:
+        amount = float(amount_str)
+    except (ValueError, TypeError):
+        flash("Invalid amount. Please enter a valid number.", "error")
+        return redirect(url_for("send_money"))
+
+    if amount <= 0:
+        flash("Amount must be greater than zero.", "error")
+        return redirect(url_for("send_money"))
+
+    if amount < 1.00:
+        flash("Minimum transfer amount is $1.00.", "error")
+        return redirect(url_for("send_money"))
+
+    # --- Balance check ---
+    current = float(user["account"].get("balance", "0"))
+    if amount > current:
+        flash(f"Insufficient balance. Your available balance is ${current:,.2f}.", "error")
+        return redirect(url_for("send_money"))
+
+    # --- Process transaction ---
+    new_balance = current - amount
+    user["account"]["balance"] = f"{new_balance:.2f}"
+
+    tx_id = f"GNB{random.randint(100000000, 999999999)}"
+
+    tx = {
+        "id": tx_id,
+        "type": "debit",
+        "amount": f"{amount:.2f}",
+        "description": f"{action} to {recipient_name} via {service}",
+        "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "balance_after": f"{new_balance:.2f}",
+        "action": action,
+        "service": service,
+        "recipient_name": recipient_name,
+        "recipient_account": recipient_account,
+        "email": recipient_email,
+        "reference": tx_id
+    }
+
+    user.setdefault("transactions", []).insert(0, tx)
+    save_user(user_email, user)
+
+    session["last_receipt"] = tx_id
+    return redirect(url_for("send_money_receipt"))
+
+
+@app.route("/send_money/receipt")
+def send_money_receipt():
+    if not session.get("user"):
+        return redirect(url_for("login"))
+    if session["user"]["role"] == "admin":
+        return redirect(url_for("admin"))
+
+    user_email = session["user"]["email"]
+    user = load_user(user_email)
+
+    if not user:
+        session.clear()
+        return redirect(url_for("login"))
+
+    ref_id = session.get("last_receipt")
+    if not ref_id:
+        return redirect(url_for("send_money"))
+
+    transactions = user.get("transactions", [])
+    tx = next((t for t in transactions if t.get("id") == ref_id), None)
+
+    if not tx:
+        return redirect(url_for("send_money"))
+
+    return render_template("receipt.html", user=user, email=user_email, tx=tx)
 
 
 # --------------------------------------------------------------------------
@@ -593,7 +727,7 @@ def admin_balance_edit():
         return redirect(url_for("admin_user_view", email=email))
 
     user["account"]["balance"] = f"{new_balance:.2f}"
-    user["transactions"] = []   # Wipe history after edit
+    user["transactions"] = []
     save_user(email, user)
 
     flash(f"Balance set to GHS {new_balance:.2f}. Transaction history cleared.", "success")
