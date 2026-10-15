@@ -1,0 +1,456 @@
+{% extends "base.html" %}
+
+{% block title %}Transaction History — GN Bank{% endblock %}
+
+{% block styles %}
+    header, footer { display: none !important; }
+    main { background: #f1f5f9; }
+
+    .app-shell {
+        max-width: 480px;
+        margin: 0 auto;
+        background: #f1f5f9;
+        min-height: 100vh;
+        padding-bottom: 60px;
+    }
+
+    /* ---------- Top Bar ---------- */
+    .app-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        background: #ffffff;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .back-btn {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.1rem; color: #334155;
+        text-decoration: none;
+    }
+    .app-topbar h1 { font-size: 1.05rem; font-weight: 700; color: #1e293b; }
+    .topbar-spacer { width: 36px; }
+
+    /* ---------- Balance Summary Strip ---------- */
+    .balance-summary {
+        margin: 1.25rem 1.25rem 0 1.25rem;
+        background: linear-gradient(135deg, #7b1113 0%, #9a3412 100%);
+        color: #ffffff;
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 10px 25px rgba(123, 17, 19, 0.2);
+    }
+    .balance-summary .lbl {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: rgba(255,255,255,0.8);
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+    }
+    .balance-summary .val {
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+    }
+    .balance-summary .count {
+        text-align: right;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: rgba(255,255,255,0.9);
+        line-height: 1.4;
+    }
+    .balance-summary .count .big {
+        font-size: 1.3rem;
+        display: block;
+        font-weight: 800;
+    }
+
+    /* ---------- Filter Tabs ---------- */
+    .filter-tabs {
+        display: flex;
+        gap: 0.5rem;
+        padding: 1rem 1.25rem 0 1.25rem;
+        overflow-x: auto;
+    }
+    .filter-tabs::-webkit-scrollbar { display: none; }
+    .filter-tab {
+        flex-shrink: 0;
+        padding: 0.5rem 1rem;
+        border-radius: 999px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+    .filter-tab.active {
+        background: #7b1113;
+        color: #ffffff;
+        border-color: #7b1113;
+    }
+
+    /* ---------- Transaction List ---------- */
+    .tx-list {
+        padding: 1rem 1.25rem 0 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+    }
+
+    .tx-card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 1.1rem 1.15rem;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+        border-left: 4px solid #7b1113;
+    }
+    .tx-card.credit { border-left-color: #16a34a; }
+    .tx-card.debit { border-left-color: #dc2626; }
+
+    /* Card header */
+    .tx-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+    .tx-head .left {
+        flex: 1;
+        min-width: 0;
+    }
+    .tx-head .title {
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: #1e293b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .tx-head .subtitle {
+        font-size: 0.72rem;
+        color: #94a3b8;
+        margin-top: 0.15rem;
+        font-family: 'Courier New', monospace;
+    }
+    .tx-head .amount {
+        font-size: 1rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+    .tx-head .amount.credit { color: #16a34a; }
+    .tx-head .amount.debit { color: #dc2626; }
+
+    /* Status pill */
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: #dcfce7;
+        color: #166534;
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 0.25rem 0.65rem;
+        border-radius: 999px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-top: 0.5rem;
+    }
+    .status-pill::before {
+        content: "●";
+        font-size: 0.55rem;
+    }
+
+    /* Details grid */
+    .tx-details {
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 0.85rem 1rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem 1rem;
+        font-size: 0.78rem;
+    }
+    .tx-details .item {
+        min-width: 0;
+    }
+    .tx-details .item .k {
+        color: #94a3b8;
+        font-weight: 700;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-bottom: 0.15rem;
+    }
+    .tx-details .item .v {
+        color: #1e293b;
+        font-weight: 700;
+        word-break: break-word;
+    }
+    .tx-details .item .v.mono {
+        font-family: 'Courier New', monospace;
+        font-size: 0.82rem;
+    }
+
+    /* Balance change row */
+    .tx-balance {
+        margin-top: 0.75rem;
+        background: #eff6ff;
+        border-radius: 10px;
+        padding: 0.6rem 0.9rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.78rem;
+        color: #1e3a8a;
+        font-weight: 700;
+    }
+    .tx-balance .arrow {
+        color: #64748b;
+        font-weight: 500;
+        margin: 0 0.35rem;
+    }
+
+    /* Security Notice */
+    .security-notice {
+        margin: 1.5rem 1.25rem 0 1.25rem;
+        background: #fef3c7;
+        border: 1px solid #fde68a;
+        border-left: 4px solid #d97706;
+        border-radius: 12px;
+        padding: 1.1rem 1.15rem;
+    }
+    .security-notice h4 {
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: #78350f;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .security-notice p {
+        font-size: 0.78rem;
+        color: #78350f;
+        line-height: 1.6;
+        margin-bottom: 0.75rem;
+    }
+    .security-notice .support-box {
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .security-notice .support-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+    .security-notice .support-row .lbl {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #991b1b;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+    .security-notice .support-row .num {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #7b1113;
+        font-family: 'Courier New', monospace;
+        text-align: right;
+    }
+
+    /* Empty State */
+    .empty-state {
+        margin: 2rem 1.25rem 0 1.25rem;
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+    }
+    .empty-icon {
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.2rem;
+        margin: 0 auto 1.25rem auto;
+    }
+    .empty-state h3 {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 0.6rem;
+    }
+    .empty-state p {
+        font-size: 0.88rem;
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 0.5rem;
+    }
+{% endblock %}
+
+{% block content %}
+    <div class="app-shell">
+
+        <!-- Top Bar -->
+        <div class="app-topbar">
+            <a href="{{ url_for('dashboard') }}" class="back-btn">←</a>
+            <h1>Transaction History</h1>
+            <div class="topbar-spacer"></div>
+        </div>
+
+        {% if transactions %}
+
+            <!-- Balance Summary -->
+            <div class="balance-summary">
+                <div>
+                    <div class="lbl">Available Balance</div>
+                    <div class="val">${{ "{:,.2f}".format(user.account.balance|float) }}</div>
+                </div>
+                <div class="count">
+                    <span class="big">{{ transactions|length }}</span>
+                    Transaction{{ 's' if transactions|length != 1 else '' }}
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <div class="filter-tab active" onclick="filterTx('all', this)">All</div>
+                <div class="filter-tab" onclick="filterTx('credit', this)">Credits</div>
+                <div class="filter-tab" onclick="filterTx('debit', this)">Debits</div>
+            </div>
+
+            <!-- Transaction List -->
+            <div class="tx-list" id="txList">
+                {% for tx in transactions %}
+                    {% set type = tx.type if tx.type else 'debit' %}
+                    {% set amount = tx.amount|float %}
+                    {% set after = tx.balance_after|float %}
+                    {% if type == 'credit' %}
+                        {% set before = after - amount %}
+                    {% else %}
+                        {% set before = after + amount %}
+                    {% endif %}
+
+                    <div class="tx-card {{ type }}" data-type="{{ type }}">
+                        <div class="tx-head">
+                            <div class="left">
+                                <div class="title">{{ tx.description }}</div>
+                                <div class="subtitle">{{ tx.date }}</div>
+                            </div>
+                            <div class="amount {{ type }}">
+                                {% if type == 'credit' %}+{% else %}-{% endif %}
+                                ${{ "{:,.2f}".format(amount) }}
+                            </div>
+                        </div>
+
+                        <span class="status-pill">Successful</span>
+
+                        <div class="tx-details" style="margin-top: 0.75rem;">
+                            <div class="item">
+                                <div class="k">Transaction ID</div>
+                                <div class="v mono">{{ tx.reference or tx.id }}</div>
+                            </div>
+                            <div class="item">
+                                <div class="k">Destination</div>
+                                <div class="v">{{ tx.service or "GN Bank" }}</div>
+                            </div>
+                            <div class="item">
+                                <div class="k">Recipient</div>
+                                <div class="v">{{ tx.recipient_name or user.full_name }}</div>
+                            </div>
+                            <div class="item">
+                                <div class="k">Account Number</div>
+                                <div class="v mono">{{ tx.recipient_account or user.account.account_number }}</div>
+                            </div>
+                            {% if tx.email %}
+                            <div class="item" style="grid-column: span 2;">
+                                <div class="k">Email</div>
+                                <div class="v">{{ tx.email }}</div>
+                            </div>
+                            {% endif %}
+                            <div class="item">
+                                <div class="k">Date</div>
+                                <div class="v">{{ tx.date.split(' ')[0] if ' ' in tx.date else tx.date }}</div>
+                            </div>
+                            <div class="item">
+                                <div class="k">Time</div>
+                                <div class="v">{{ tx.date.split(' ')[1] if ' ' in tx.date else '' }}</div>
+                            </div>
+                        </div>
+
+                        <div class="tx-balance">
+                            <span>
+                                Before: ${{ "{:,.2f}".format(before) }}
+                                <span class="arrow">→</span>
+                                After: ${{ "{:,.2f}".format(after) }}
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+        {% else %}
+
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <h3>No Transactions Yet</h3>
+                <p>Your transaction history is currently empty.</p>
+                <p>Every deposit, withdrawal, and transfer made to your account will appear here automatically.</p>
+            </div>
+
+        {% endif %}
+
+        <!-- Security Notice -->
+        <div class="security-notice">
+            <h4>🛡️ Identity Verification Notice</h4>
+            <p>Your transfers have been completed successfully. However, for your protection and to prevent fraudulent activity, additional identity verification may be required on certain transactions. If you notice any unfamiliar activity or have concerns about a transaction, please contact our Customer Support Center immediately.</p>
+            <div class="support-box">
+                <div class="support-row">
+                    <span class="lbl">Customer Support Center</span>
+                    <span class="num">030221199</span>
+                </div>
+                <div class="support-row">
+                    <span class="lbl">Mobile Support</span>
+                    <span class="num">+233 20 795 6331</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function filterTx(type, el) {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+
+            document.querySelectorAll('.tx-card').forEach(card => {
+                if (type === 'all') {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = card.getAttribute('data-type') === type ? 'block' : 'none';
+                }
+            });
+        }
+    </script>
+{% endblock %}

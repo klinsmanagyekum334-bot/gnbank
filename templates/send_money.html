@@ -1,0 +1,627 @@
+{% extends "base.html" %}
+
+{% block title %}Send Money — GN Bank{% endblock %}
+
+{% block styles %}
+    header, footer { display: none !important; }
+    main { background: #f1f5f9; }
+
+    .app-shell {
+        max-width: 480px;
+        margin: 0 auto;
+        background: #f1f5f9;
+        min-height: 100vh;
+        padding-bottom: 40px;
+    }
+
+    .app-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        background: #ffffff;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .back-btn {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.1rem; color: #334155;
+        text-decoration: none;
+    }
+    .app-topbar h1 { font-size: 1.05rem; font-weight: 700; color: #1e293b; }
+    .topbar-spacer { width: 36px; }
+
+    .flash-msg {
+        margin: 0.75rem 1.25rem 0 1.25rem;
+        padding: 0.85rem 1rem;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-align: center;
+        animation: fadeIn 0.3s ease-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .flash-error { background: #fee2e2; color: #991b1b; border-left: 4px solid #dc2626; }
+    .flash-success { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+
+    .action-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.7rem;
+        padding: 1.25rem 1.25rem 0 1.25rem;
+    }
+    .action-tab {
+        background: #ffffff;
+        border: 2px solid transparent;
+        border-radius: 14px;
+        padding: 1rem 0.75rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+    .action-tab:hover { transform: translateY(-2px); }
+    .action-tab.active {
+        border-color: #7b1113;
+        box-shadow: 0 6px 18px rgba(123, 17, 19, 0.15);
+    }
+    .action-tab .icon { font-size: 1.5rem; display: block; margin-bottom: 0.4rem; }
+    .action-tab .label { font-size: 0.85rem; font-weight: 700; color: #1e293b; }
+
+    .form-section { padding: 1.25rem; }
+    .form-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 1.5rem 1.25rem;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05);
+    }
+
+    .form-group { margin-bottom: 1.1rem; }
+    .form-group:last-of-type { margin-bottom: 0; }
+    .form-group label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #64748b;
+        margin-bottom: 0.4rem;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        color: #1e293b;
+        background: #fff;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #7b1113;
+        box-shadow: 0 0 0 3px rgba(123, 17, 19, 0.1);
+    }
+    .form-group input.error {
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+    .form-group select {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 14px;
+        padding-right: 2.5rem;
+    }
+
+    .others-section {
+        display: none;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px dashed #e2e8f0;
+    }
+    .others-section.show { display: block; }
+    .others-title {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.6rem;
+    }
+    .others-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.6rem;
+    }
+    .other-card {
+        background: #f8fafc;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        padding: 0.7rem 0.4rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .other-card:hover { background: #f1f5f9; }
+    .other-card.selected {
+        border-color: #7b1113;
+        background: #fef2f2;
+    }
+    .other-card .icon { font-size: 1.2rem; display: block; margin-bottom: 0.25rem; }
+    .other-card .name { font-size: 0.7rem; font-weight: 700; color: #475569; }
+
+    /* Balance strip */
+    .balance-strip {
+        margin: 0 1.25rem 1rem 1.25rem;
+        background: linear-gradient(135deg, #7b1113, #9a3412);
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 0.85rem 1.15rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .balance-strip .lbl {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: rgba(255,255,255,0.8);
+        font-weight: 700;
+    }
+    .balance-strip .val {
+        font-size: 1.15rem;
+        font-weight: 800;
+    }
+
+    .continue-btn {
+        width: 100%;
+        background: #b45309;
+        color: #ffffff;
+        border: none;
+        padding: 1rem;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.98rem;
+        cursor: pointer;
+        margin-top: 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 6px 20px rgba(180, 83, 9, 0.25);
+        transition: background 0.15s;
+    }
+    .continue-btn:hover { background: #92400e; }
+    .back-dash-btn {
+        width: 100%;
+        background: #ffffff;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 0.9rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.92rem;
+        cursor: pointer;
+        margin-top: 0.75rem;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .back-dash-btn:hover { background: #f1f5f9; }
+
+    /* Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(3px);
+        z-index: 200;
+        align-items: center;
+        justify-content: center;
+        padding: 1.25rem;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 2rem 1.5rem 1.5rem 1.5rem;
+        max-width: 400px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+        animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes popIn {
+        from { transform: scale(0.85); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .modal-icon-top {
+        width: 60px; height: 60px;
+        margin: 0 auto 1rem auto;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #38bdf8, #0284c7);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.6rem; color: #ffffff;
+    }
+    .modal-box h3 {
+        text-align: center;
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 0.4rem;
+    }
+    .modal-box .modal-sub {
+        text-align: center;
+        font-size: 0.85rem;
+        color: #64748b;
+        line-height: 1.5;
+        margin-bottom: 1.25rem;
+    }
+    .modal-details {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1rem 1.15rem;
+        margin-bottom: 1rem;
+    }
+    .modal-details .row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.45rem 0;
+        font-size: 0.85rem;
+        border-bottom: 1px dashed #e2e8f0;
+        gap: 0.5rem;
+    }
+    .modal-details .row:last-child { border-bottom: none; }
+    .modal-details .row .k { color: #64748b; flex-shrink: 0; }
+    .modal-details .row .v { color: #1e293b; font-weight: 700; text-align: right; word-break: break-word; }
+    .modal-support {
+        background: #fef2f2;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+    .modal-support .lbl {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #991b1b;
+        font-weight: 700;
+        margin-bottom: 0.15rem;
+    }
+    .modal-support .num {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #7b1113;
+    }
+    .modal-confirm-btn {
+        width: 100%;
+        background: #b45309;
+        color: #ffffff;
+        border: none;
+        padding: 0.95rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.98rem;
+        cursor: pointer;
+        margin-bottom: 0.5rem;
+        transition: background 0.15s;
+    }
+    .modal-confirm-btn:hover { background: #92400e; }
+    .modal-cancel-btn {
+        width: 100%;
+        background: #ffffff;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 0.85rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.92rem;
+        cursor: pointer;
+    }
+    .modal-cancel-btn:hover { background: #f1f5f9; }
+{% endblock %}
+
+{% block content %}
+    <div class="app-shell">
+
+        <div class="app-topbar">
+            <a href="{{ url_for('dashboard') }}" class="back-btn">←</a>
+            <h1>Send Money</h1>
+            <div class="topbar-spacer"></div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash-msg flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <!-- Live Balance -->
+        <div class="balance-strip">
+            <span class="lbl">Available Balance</span>
+            <span class="val" id="liveBalance">${{ "{:,.2f}".format(user.account.balance|float) }}</span>
+        </div>
+
+        <!-- Action Tabs -->
+        <div class="action-tabs">
+            <div class="action-tab" id="tabPay" onclick="selectAction('Make Payments')">
+                <span class="icon">💳</span>
+                <span class="label">Make Payments</span>
+            </div>
+            <div class="action-tab" id="tabSend" onclick="selectAction('Send Money')">
+                <span class="icon">✈️</span>
+                <span class="label">Send Money</span>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="form-section">
+            <div class="form-card">
+                <form id="transferForm" method="POST" action="{{ url_for('send_money_confirm') }}" autocomplete="off">
+                    <input type="hidden" name="action" id="actionInput">
+                    <input type="hidden" name="service" id="serviceInput">
+                    <input type="hidden" name="source_account" value="{{ user.account.account_number }}">
+
+                    <div class="form-group">
+                        <label>Select Bank</label>
+                        <select id="bankSelect" name="bank_display" onchange="handleBankChange()" required>
+                            <option value="" disabled selected></option>
+                            <optgroup label="International Banks">
+                                <option value="Chase Bank">Chase Bank (USA)</option>
+                                <option value="HSBC">HSBC (UK)</option>
+                                <option value="Barclays">Barclays (UK)</option>
+                                <option value="Wells Fargo">Wells Fargo (USA)</option>
+                                <option value="Citibank">Citibank (USA)</option>
+                                <option value="Standard Chartered">Standard Chartered (Global)</option>
+                                <option value="Bank of America">Bank of America (USA)</option>
+                                <option value="Deutsche Bank">Deutsche Bank (Germany)</option>
+                                <option value="BNP Paribas">BNP Paribas (France)</option>
+                                <option value="UBS">UBS (Switzerland)</option>
+                                <option value="Santander">Santander (Spain)</option>
+                                <option value="Royal Bank of Canada">Royal Bank of Canada</option>
+                                <option value="JPMorgan Chase">JPMorgan Chase (USA)</option>
+                                <option value="Goldman Sachs">Goldman Sachs (USA)</option>
+                                <option value="Bank of China">Bank of China (China)</option>
+                            </optgroup>
+                            <optgroup label="More Options">
+                                <option value="Others">Others</option>
+                            </optgroup>
+                        </select>
+
+                        <div class="others-section" id="othersSection">
+                            <div class="others-title">Choose Service</div>
+                            <div class="others-grid">
+                                <div class="other-card" onclick="pickOther('PayPal', this)">
+                                    <span class="icon">🅿️</span>
+                                    <span class="name">PayPal</span>
+                                </div>
+                                <div class="other-card" onclick="pickOther('Western Union', this)">
+                                    <span class="icon">🌍</span>
+                                    <span class="name">Western Union</span>
+                                </div>
+                                <div class="other-card" onclick="pickOther('MoneyGram', this)">
+                                    <span class="icon">💸</span>
+                                    <span class="name">MoneyGram</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Account Name</label>
+                        <input type="text" name="recipient_name" id="recipientName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Account Number</label>
+                        <input type="text" name="recipient_account" id="recipientAccount" required inputmode="numeric" oninput="validateAccountNumber()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" name="email" id="recipientEmail" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Amount (USD)</label>
+                        <input type="number" name="amount" id="amountInput" step="0.01" min="0.01" required oninput="validateAmount()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" name="password" id="passwordInput" required autocomplete="new-password">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password" name="confirm_password" id="confirmPassword" required autocomplete="new-password">
+                    </div>
+
+                    <button type="button" class="continue-btn" onclick="openConfirmModal()">
+                        ✈️ Continue to Transfer
+                    </button>
+                </form>
+
+                <a href="{{ url_for('dashboard') }}" class="back-dash-btn">← Back to Dashboard</a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-box">
+            <div class="modal-icon-top">✓</div>
+            <h3>Confirm Your Transfer</h3>
+            <p class="modal-sub">Please review your transfer details before confirming. Once submitted, this transaction cannot be reversed.</p>
+
+            <div class="modal-details">
+                <div class="row"><span class="k">Action</span><span class="v" id="modalAction">—</span></div>
+                <div class="row"><span class="k">Transfer Method</span><span class="v" id="modalService">—</span></div>
+                <div class="row"><span class="k">Amount</span><span class="v" id="modalAmount">$0.00</span></div>
+                <div class="row"><span class="k">Recipient</span><span class="v" id="modalRecipient">—</span></div>
+                <div class="row"><span class="k">Account Number</span><span class="v" id="modalAccount">—</span></div>
+                <div class="row"><span class="k">Email</span><span class="v" id="modalEmail">—</span></div>
+                <div class="row"><span class="k">Balance After</span><span class="v" id="modalNewBalance">—</span></div>
+            </div>
+
+            <div class="modal-support">
+                <div class="lbl">Customer Support Center</div>
+                <div class="num">+233 20 795 6331</div>
+            </div>
+
+            <button class="modal-confirm-btn" onclick="submitTransfer()">Confirm Transfer</button>
+            <button class="modal-cancel-btn" onclick="closeConfirmModal()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        const SOURCE_ACCOUNT = "{{ user.account.account_number }}";
+        const CURRENT_BALANCE = {{ user.account.balance|float }};
+
+        let selectedAction = null;
+        let selectedService = null;
+
+        function showError(msg) {
+            const existing = document.querySelector('.flash-msg');
+            if (existing) existing.remove();
+            const div = document.createElement('div');
+            div.className = 'flash-msg flash-error';
+            div.textContent = msg;
+            document.querySelector('.app-shell').insertBefore(div, document.querySelector('.balance-strip'));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function clearError(el) {
+            if (el) el.classList.remove('error');
+        }
+
+        function selectAction(name) {
+            selectedAction = name;
+            document.getElementById('actionInput').value = name;
+            document.getElementById('tabPay').classList.remove('active');
+            document.getElementById('tabSend').classList.remove('active');
+            if (name === 'Make Payments') {
+                document.getElementById('tabPay').classList.add('active');
+            } else {
+                document.getElementById('tabSend').classList.add('active');
+            }
+        }
+
+        function handleBankChange() {
+            const sel = document.getElementById('bankSelect');
+            const othersSection = document.getElementById('othersSection');
+            if (sel.value === 'Others') {
+                othersSection.classList.add('show');
+                selectedService = null;
+                document.getElementById('serviceInput').value = '';
+            } else {
+                othersSection.classList.remove('show');
+                selectedService = sel.value;
+                document.getElementById('serviceInput').value = sel.value;
+                document.querySelectorAll('.other-card').forEach(c => c.classList.remove('selected'));
+            }
+        }
+
+        function pickOther(name, el) {
+            selectedService = name;
+            document.getElementById('serviceInput').value = name;
+            document.querySelectorAll('.other-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function validateAccountNumber() {
+            const input = document.getElementById('recipientAccount');
+            const val = input.value.trim();
+            if (val === SOURCE_ACCOUNT) {
+                input.classList.add('error');
+                return false;
+            }
+            clearError(input);
+            return true;
+        }
+
+        function validateAmount() {
+            const input = document.getElementById('amountInput');
+            const val = parseFloat(input.value);
+            if (isNaN(val) || val <= 0) {
+                input.classList.add('error');
+                return false;
+            }
+            if (val > CURRENT_BALANCE) {
+                input.classList.add('error');
+                return false;
+            }
+            clearError(input);
+            return true;
+        }
+
+        function formatMoney(n) {
+            return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function openConfirmModal() {
+            const action = selectedAction;
+            const service = selectedService;
+            const recipient = document.getElementById('recipientName').value.trim();
+            const account = document.getElementById('recipientAccount').value.trim();
+            const email = document.getElementById('recipientEmail').value.trim();
+            const amount = parseFloat(document.getElementById('amountInput').value);
+            const pass = document.getElementById('passwordInput').value;
+            const confirm = document.getElementById('confirmPassword').value;
+
+            if (!action) { showError('Please select "Make Payments" or "Send Money".'); return; }
+            if (!service) { showError('Please select a bank or service.'); return; }
+            if (!recipient) { showError('Please enter the recipient name.'); return; }
+            if (!account) { showError('Please enter the account number.'); return; }
+            if (account === SOURCE_ACCOUNT) { showError('You cannot send money to the same account number as your own.'); return; }
+            if (!email || !/^\S+@\S+\.\S+$/.test(email)) { showError('Please enter a valid email address.'); return; }
+            if (isNaN(amount) || amount <= 0) { showError('Please enter a valid amount greater than 0.'); return; }
+            if (amount > CURRENT_BALANCE) { showError('Insufficient balance. Your available balance is ' + formatMoney(CURRENT_BALANCE) + '.'); return; }
+            if (!pass) { showError('Please enter your password.'); return; }
+            if (pass !== confirm) { showError('Passwords do not match.'); return; }
+
+            const newBalance = CURRENT_BALANCE - amount;
+
+            document.getElementById('modalAction').textContent = action;
+            document.getElementById('modalService').textContent = service;
+            document.getElementById('modalAmount').textContent = formatMoney(amount);
+            document.getElementById('modalRecipient').textContent = recipient;
+            document.getElementById('modalAccount').textContent = account;
+            document.getElementById('modalEmail').textContent = email;
+            document.getElementById('modalNewBalance').textContent = formatMoney(newBalance);
+
+            document.getElementById('confirmModal').classList.add('show');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('show');
+        }
+
+        function submitTransfer() {
+            document.getElementById('transferForm').submit();
+        }
+
+        document.getElementById('confirmModal').addEventListener('click', function(e) {
+            if (e.target === this) closeConfirmModal();
+        });
+    </script>
+{% endblock %}

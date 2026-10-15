@@ -1,0 +1,410 @@
+{% extends "base.html" %}
+
+{% block title %}Transfer Receipt — GN Bank{% endblock %}
+
+{% block styles %}
+    header, footer { display: none !important; }
+    main { background: #f1f5f9; }
+
+    .app-shell {
+        max-width: 480px;
+        margin: 0 auto;
+        background: #f8fafc;
+        min-height: 100vh;
+        padding-bottom: 60px;
+    }
+
+    .app-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .back-btn {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.1rem; color: #334155;
+        text-decoration: none;
+    }
+    .app-topbar h1 { font-size: 1.05rem; font-weight: 700; color: #1e293b; }
+    .topbar-spacer { width: 36px; }
+
+    .receipt-wrap { padding: 1.5rem 1.25rem 0 1.25rem; }
+    .receipt {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 2rem 1.5rem;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .success-badge {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 1rem;
+    }
+    .success-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: #22c55e;
+        color: #ffffff;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.4rem 0.85rem;
+        border-radius: 999px;
+        letter-spacing: 0.5px;
+    }
+
+    .receipt-logo {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    .receipt-logo img {
+        height: 55px;
+        width: auto;
+        object-fit: contain;
+    }
+
+    .receipt h1 {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 0.35rem;
+    }
+    .receipt .receipt-sub {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-bottom: 1.5rem;
+    }
+    .receipt .receipt-sub strong { color: #1e293b; font-weight: 700; }
+
+    /* Transaction ID Highlight */
+    .tx-id-box {
+        background: linear-gradient(135deg, #7b1113 0%, #9a3412 100%);
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 1rem 1.15rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+    .tx-id-box .lbl {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: rgba(255, 255, 255, 0.75);
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+    }
+    .tx-id-box .val {
+        font-size: 1.15rem;
+        font-weight: 800;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 1px;
+        word-break: break-all;
+    }
+
+    .receipt-section-label {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .details-grid {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.1rem 1.15rem;
+        margin-bottom: 1.5rem;
+    }
+    .details-grid-inner {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.1rem 1rem;
+    }
+    .detail-item .lbl {
+        font-size: 0.72rem;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+    }
+    .detail-item .val {
+        font-size: 0.9rem;
+        color: #1e293b;
+        font-weight: 700;
+        word-break: break-word;
+    }
+    .detail-item .val.mono { font-family: 'Courier New', monospace; }
+
+    .recipient-box {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1rem 1.15rem;
+        margin-bottom: 0.75rem;
+    }
+    .recipient-box .lbl {
+        font-size: 0.72rem;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+    }
+    .recipient-box .val {
+        font-size: 0.95rem;
+        color: #1e293b;
+        font-weight: 700;
+        word-break: break-word;
+    }
+    .recipient-box .val.mono { font-family: 'Courier New', monospace; }
+
+    .financial-box {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+    .financial-top {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        padding: 1rem 1.15rem;
+        gap: 1rem;
+    }
+    .financial-top .item .lbl {
+        font-size: 0.72rem;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+    }
+    .financial-top .item .val {
+        font-size: 1rem;
+        color: #1e293b;
+        font-weight: 800;
+    }
+    .financial-bottom {
+        background: #f8fafc;
+        padding: 0.85rem 1.15rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #e2e8f0;
+    }
+    .financial-bottom .lbl { font-size: 0.85rem; color: #475569; font-weight: 600; }
+    .financial-bottom .val { font-size: 1.1rem; color: #1e293b; font-weight: 800; }
+
+    .security-note {
+        text-align: center;
+        padding: 1rem 0.5rem 0.5rem 0.5rem;
+        border-top: 1px dashed #e2e8f0;
+        margin-top: 0.5rem;
+    }
+    .security-note .icon {
+        font-size: 1.2rem;
+        color: #94a3b8;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .security-note p {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        line-height: 1.6;
+        margin: 0;
+    }
+    .security-note .support-line {
+        margin-top: 0.9rem;
+        padding-top: 0.9rem;
+        border-top: 1px dashed #e2e8f0;
+    }
+    .security-note .support-line .lbl {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94a3b8;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+    .security-note .support-line .num {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #7b1113;
+    }
+    .copyright {
+        text-align: center;
+        font-size: 0.7rem;
+        color: #cbd5e1;
+        margin-top: 1rem;
+    }
+
+    .receipt-actions {
+        padding: 1.25rem 1.25rem 2rem 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .print-btn {
+        width: 100%;
+        background: #b45309;
+        color: #ffffff;
+        border: none;
+        padding: 1rem;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.98rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 6px 20px rgba(180, 83, 9, 0.25);
+    }
+    .print-btn:hover { background: #92400e; }
+    .dash-btn {
+        width: 100%;
+        background: #ffffff;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 0.95rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.92rem;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .dash-btn:hover { background: #f1f5f9; }
+
+    @media print {
+        .app-topbar, .receipt-actions { display: none !important; }
+        body, main, .app-shell { background: #ffffff !important; }
+        .receipt { box-shadow: none; padding: 0; }
+    }
+{% endblock %}
+
+{% block content %}
+    <div class="app-shell">
+
+        <div class="app-topbar">
+            <a href="{{ url_for('dashboard') }}" class="back-btn">←</a>
+            <h1>Receipt</h1>
+            <div class="topbar-spacer"></div>
+        </div>
+
+        <div class="receipt-wrap">
+            <div class="receipt">
+
+                <div class="success-badge">
+                    <span class="success-pill">✓ Successful</span>
+                </div>
+
+                <div class="receipt-logo">
+                    <img src="{{ url_for('static', filename='uploads/logo.jpg') }}" alt="GN Bank">
+                </div>
+
+                <h1>Transaction Details</h1>
+                <p class="receipt-sub">
+                    You have successfully {{ tx.action|lower if tx.action else 'transferred' }}
+                    <strong>${{ "{:,.2f}".format(tx.amount|float) }}</strong>
+                    to <strong>{{ tx.service }}</strong>.
+                </p>
+
+                <!-- Transaction ID Highlight -->
+                <div class="tx-id-box">
+                    <div class="lbl">Transaction ID</div>
+                    <div class="val">{{ tx.reference }}</div>
+                </div>
+
+                <!-- Details Grid -->
+                <div class="details-grid">
+                    <div class="details-grid-inner">
+                        <div class="detail-item">
+                            <div class="lbl">📅 Date</div>
+                            <div class="val">{{ tx.date.split(' ')[0] if ' ' in tx.date else tx.date }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="lbl">🕐 Time</div>
+                            <div class="val">{{ tx.date.split(' ')[1] if ' ' in tx.date else '' }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="lbl">💳 Method</div>
+                            <div class="val">{{ tx.service }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="lbl">📌 Action</div>
+                            <div class="val">{{ tx.action or "Send Money" }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recipient -->
+                <div class="receipt-section-label">👤 Recipient Details</div>
+                <div class="recipient-box">
+                    <div class="lbl">Account Name</div>
+                    <div class="val">{{ tx.recipient_name }}</div>
+                </div>
+                <div class="recipient-box">
+                    <div class="lbl">Account Number</div>
+                    <div class="val mono">{{ tx.recipient_account }}</div>
+                </div>
+                <div class="recipient-box">
+                    <div class="lbl">Email Address</div>
+                    <div class="val">{{ tx.email or "—" }}</div>
+                </div>
+
+                <!-- Financial Details -->
+                <div class="receipt-section-label" style="margin-top: 1rem;">💲 Financial Details</div>
+                <div class="financial-box">
+                    <div class="financial-top">
+                        <div class="item">
+                            <div class="lbl">Amount Sent</div>
+                            <div class="val">${{ "{:,.2f}".format(tx.amount|float) }}</div>
+                        </div>
+                        <div class="item">
+                            <div class="lbl">Handling & Charges</div>
+                            <div class="val">$0.00</div>
+                        </div>
+                    </div>
+                    <div class="financial-bottom">
+                        <span class="lbl">Available Balance</span>
+                        <span class="val">${{ "{:,.2f}".format(tx.balance_after|float) }}</span>
+                    </div>
+                </div>
+
+                <!-- Security Note -->
+                <div class="security-note">
+                    <span class="icon">🛡️</span>
+                    <p>This receipt serves as confirmation of this transaction.<br>For any issues or inquiries regarding this transaction, please contact our support center.</p>
+
+                    <div class="support-line">
+                        <div class="lbl">Customer Support Center</div>
+                        <div class="num">+233 20 795 6331</div>
+                    </div>
+                </div>
+
+                <div class="copyright">
+                    © {{ tx.date[:4] }} GN BANK. All rights reserved.
+                </div>
+
+            </div>
+        </div>
+
+        <div class="receipt-actions">
+            <button class="print-btn" onclick="window.print()">🖨️ Print Receipt</button>
+            <a href="{{ url_for('dashboard') }}" class="dash-btn">← Back to Dashboard</a>
+        </div>
+
+    </div>
+{% endblock %}
